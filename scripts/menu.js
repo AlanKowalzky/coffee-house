@@ -1,4 +1,4 @@
-// Menu page fu// Menu functionality
+// Menu functionality
 class MenuManager {
     constructor() {
         this.products = [];
@@ -18,19 +18,151 @@ class MenuManager {
     
     async loadProducts() {
         try {
-            const response = await fetch('products.json');
+            const response = await fetch('./products.json');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             this.products = await response.json();
         } catch (error) {
-            console.error('Error loading products:', error);
-            this.products = [];
+            console.error('Error loading products, using fallback data:', error);
+            this.products = this.getFallbackProducts();
         }
     }
     
+    getFallbackProducts() {
+        return [
+            {
+                "name": "Irish coffee",
+                "description": "Fragrant black coffee with Jameson Irish whiskey and whipped milk",
+                "price": "7.00",
+                "category": "coffee",
+                "sizes": {
+                    "s": { "size": "200 ml", "add-price": "0.00" },
+                    "m": { "size": "300 ml", "add-price": "0.50" },
+                    "l": { "size": "400 ml", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Sugar", "add-price": "0.50" },
+                    { "name": "Cinnamon", "add-price": "0.50" },
+                    { "name": "Syrup", "add-price": "0.50" }
+                ]
+            },
+            {
+                "name": "Kahlua coffee",
+                "description": "Classic coffee with milk and Kahlua liqueur under a cap of frothed milk",
+                "price": "7.00",
+                "category": "coffee",
+                "sizes": {
+                    "s": { "size": "200 ml", "add-price": "0.00" },
+                    "m": { "size": "300 ml", "add-price": "0.50" },
+                    "l": { "size": "400 ml", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Sugar", "add-price": "0.50" },
+                    { "name": "Cinnamon", "add-price": "0.50" },
+                    { "name": "Syrup", "add-price": "0.50" }
+                ]
+            },
+            {
+                "name": "Honey raf",
+                "description": "Espresso with frothed milk, cream and aromatic honey",
+                "price": "5.50",
+                "category": "coffee",
+                "sizes": {
+                    "s": { "size": "200 ml", "add-price": "0.00" },
+                    "m": { "size": "300 ml", "add-price": "0.50" },
+                    "l": { "size": "400 ml", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Sugar", "add-price": "0.50" },
+                    { "name": "Cinnamon", "add-price": "0.50" },
+                    { "name": "Syrup", "add-price": "0.50" }
+                ]
+            },
+            {
+                "name": "Ice cappuccino",
+                "description": "Cappuccino with soft thick foam in summer version with ice",
+                "price": "5.00",
+                "category": "coffee",
+                "sizes": {
+                    "s": { "size": "200 ml", "add-price": "0.00" },
+                    "m": { "size": "300 ml", "add-price": "0.50" },
+                    "l": { "size": "400 ml", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Sugar", "add-price": "0.50" },
+                    { "name": "Cinnamon", "add-price": "0.50" },
+                    { "name": "Syrup", "add-price": "0.50" }
+                ]
+            },
+            {
+                "name": "Moroccan",
+                "description": "Fragrant black tea with the addition of tangerine, cinnamon, honey, lemon and mint",
+                "price": "4.50",
+                "category": "tea",
+                "sizes": {
+                    "s": { "size": "200 ml", "add-price": "0.00" },
+                    "m": { "size": "300 ml", "add-price": "0.50" },
+                    "l": { "size": "400 ml", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Sugar", "add-price": "0.50" },
+                    { "name": "Lemon", "add-price": "0.50" },
+                    { "name": "Syrup", "add-price": "0.50" }
+                ]
+            },
+            {
+                "name": "Ginger",
+                "description": "Original black tea with fresh ginger, lemon and honey",
+                "price": "5.00",
+                "category": "tea",
+                "sizes": {
+                    "s": { "size": "200 ml", "add-price": "0.00" },
+                    "m": { "size": "300 ml", "add-price": "0.50" },
+                    "l": { "size": "400 ml", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Sugar", "add-price": "0.50" },
+                    { "name": "Lemon", "add-price": "0.50" },
+                    { "name": "Syrup", "add-price": "0.50" }
+                ]
+            },
+            {
+                "name": "Marble cheesecake",
+                "description": "Philadelphia cheese with lemon zest on a light sponge cake and red currant jam",
+                "price": "3.50",
+                "category": "dessert",
+                "sizes": {
+                    "s": { "size": "50 g", "add-price": "0.00" },
+                    "m": { "size": "100 g", "add-price": "0.50" },
+                    "l": { "size": "200 g", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Berries", "add-price": "0.50" },
+                    { "name": "Nuts", "add-price": "0.50" },
+                    { "name": "Jam", "add-price": "0.50" }
+                ]
+            },
+            {
+                "name": "Red velvet",
+                "description": "Layer cake with cream cheese frosting",
+                "price": "4.00",
+                "category": "dessert",
+                "sizes": {
+                    "s": { "size": "50 g", "add-price": "0.00" },
+                    "m": { "size": "100 g", "add-price": "0.50" },
+                    "l": { "size": "200 g", "add-price": "1.00" }
+                },
+                "additives": [
+                    { "name": "Berries", "add-price": "0.50" },
+                    { "name": "Nuts", "add-price": "0.50" },
+                    { "name": "Jam", "add-price": "0.50" }
+                ]
+            }
+        ];
+    }
+    
     setupEventListeners() {
-        // Category tabs
         const tabButtons = document.querySelectorAll('.tab-btn');
         tabButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -41,13 +173,11 @@ class MenuManager {
             });
         });
         
-        // Load more button
         const loadMoreBtn = document.getElementById('load-more-btn');
         if (loadMoreBtn) {
             loadMoreBtn.addEventListener('click', () => this.loadMoreProducts());
         }
         
-        // Resize handler
         window.addEventListener('resize', () => {
             const wasMobile = this.isMobile;
             this.isMobile = window.innerWidth <= 768;
@@ -61,7 +191,6 @@ class MenuManager {
     switchCategory(category) {
         this.currentCategory = category;
         
-        // Update active tab
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -75,6 +204,8 @@ class MenuManager {
         const grid = document.getElementById('menu-grid');
         const loadMoreBtn = document.getElementById('load-more-btn');
         
+        if (!grid) return;
+        
         grid.innerHTML = '';
         
         const maxProducts = this.isMobile ? 4 : categoryProducts.length;
@@ -85,11 +216,12 @@ class MenuManager {
             grid.appendChild(card);
         });
         
-        // Show/hide load more button
-        if (this.isMobile && categoryProducts.length > 4) {
-            loadMoreBtn.style.display = this.displayedProducts.length < categoryProducts.length ? 'block' : 'none';
-        } else {
-            loadMoreBtn.style.display = 'none';
+        if (loadMoreBtn) {
+            if (this.isMobile && categoryProducts.length > 4) {
+                loadMoreBtn.style.display = this.displayedProducts.length < categoryProducts.length ? 'block' : 'none';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
         }
     }
     
@@ -97,6 +229,8 @@ class MenuManager {
         const categoryProducts = this.products.filter(p => p.category === this.currentCategory);
         const grid = document.getElementById('menu-grid');
         const loadMoreBtn = document.getElementById('load-more-btn');
+        
+        if (!grid) return;
         
         const remainingProducts = categoryProducts.slice(this.displayedProducts.length);
         
@@ -106,18 +240,18 @@ class MenuManager {
         });
         
         this.displayedProducts = categoryProducts;
-        loadMoreBtn.style.display = 'none';
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = 'none';
+        }
     }
     
     createProductCard(product) {
         const card = document.createElement('div');
         card.className = 'product-card';
         
-        // Get image based on category and product index
         const categoryProducts = this.products.filter(p => p.category === product.category);
         const productIndex = categoryProducts.indexOf(product) + 1;
         
-        // Use correct file extension
         let imagePath;
         if (product.category === 'coffee' && productIndex === 1) {
             imagePath = `assets/coffee-1.png`;
@@ -128,7 +262,7 @@ class MenuManager {
         
         const img = document.createElement('img');
         img.src = imagePath;
-        img.alt = this.escapeHtml(product.name);
+        img.alt = product.name;
         img.className = 'product-image';
         
         const title = document.createElement('h3');
@@ -156,14 +290,12 @@ class MenuManager {
         const overlay = document.querySelector('.modal-overlay');
         const closeBtn = document.querySelector('.modal-close');
         
-        // Close modal events
         [overlay, closeBtn].forEach(element => {
             if (element) {
                 element.addEventListener('click', () => this.closeModal());
             }
         });
         
-        // Prevent modal close when clicking inside modal content
         const modalContent = document.querySelector('.modal-content');
         if (modalContent) {
             modalContent.addEventListener('click', (e) => {
@@ -175,15 +307,12 @@ class MenuManager {
     openModal(product) {
         const modal = document.getElementById('product-modal');
         
-        // Populate modal content
         document.getElementById('modal-product-name').textContent = product.name;
         document.getElementById('modal-product-description').textContent = product.description;
         
-        // Set modal image
         const categoryProducts = this.products.filter(p => p.category === product.category);
         const productIndex = categoryProducts.indexOf(product) + 1;
         
-        // Use correct file extension
         let imagePath;
         if (product.category === 'coffee' && productIndex === 1) {
             imagePath = `assets/coffee-1.png`;
@@ -195,16 +324,10 @@ class MenuManager {
         document.getElementById('modal-product-image').src = imagePath;
         document.getElementById('modal-product-image').alt = product.name;
         
-        // Setup size options
         this.setupSizeOptions(product);
-        
-        // Setup additives options
         this.setupAdditivesOptions(product);
-        
-        // Calculate initial price
         this.updateTotalPrice(product);
         
-        // Show modal
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
@@ -224,8 +347,9 @@ class MenuManager {
             btn.className = `option-btn ${index === 0 ? 'active' : ''}`;
             btn.dataset.size = size;
             btn.dataset.price = data['add-price'];
+            
             const sizeText = document.createElement('span');
-            sizeText.innerHTML = `${size.toUpperCase()}<br/>${this.escapeHtml(data.size)}`;
+            sizeText.innerHTML = `${size.toUpperCase()}<br/>${data.size}`;
             btn.appendChild(sizeText);
             
             btn.addEventListener('click', () => {
@@ -246,8 +370,9 @@ class MenuManager {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.dataset.price = additive['add-price'];
+            
             const additiveText = document.createElement('span');
-            additiveText.innerHTML = `${this.escapeHtml(additive.name)}<br/>+$${additive['add-price']}`;
+            additiveText.innerHTML = `${additive.name}<br/>+$${additive['add-price']}`;
             btn.appendChild(additiveText);
             
             btn.addEventListener('click', () => {
@@ -262,13 +387,11 @@ class MenuManager {
     updateTotalPrice(product) {
         let total = parseFloat(product.price);
         
-        // Add size price
         const activeSize = document.querySelector('#size-options .option-btn.active');
         if (activeSize) {
             total += parseFloat(activeSize.dataset.price);
         }
         
-        // Add additives prices
         document.querySelectorAll('#additives-options .option-btn.active').forEach(btn => {
             total += parseFloat(btn.dataset.price);
         });
@@ -280,14 +403,6 @@ class MenuManager {
     }
 }
 
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-}
-
-// Initialize menu manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     try {
         new MenuManager();
