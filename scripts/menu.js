@@ -104,8 +104,22 @@ class MenuManager {
     createProductCard(product) {
         const card = document.createElement('div');
         card.className = 'product-card';
+        
+        // Get image based on category and product index
+        const categoryProducts = this.products.filter(p => p.category === product.category);
+        const productIndex = categoryProducts.indexOf(product) + 1;
+        
+        // Use correct file extension
+        let imagePath;
+        if (product.category === 'coffee' && productIndex === 1) {
+            imagePath = `assets/coffee-1.png`;
+        } else {
+            const extension = product.category === 'coffee' ? 'jpg' : 'png';
+            imagePath = `assets/${product.category}-${productIndex}.${extension}`;
+        }
+        
         card.innerHTML = `
-            <div class="product-image"></div>
+            <img src="${imagePath}" alt="${product.name}" class="product-image">
             <h3>${product.name}</h3>
             <p>${product.description}</p>
             <span class="price">$${product.price}</span>
@@ -140,6 +154,22 @@ class MenuManager {
         // Populate modal content
         document.getElementById('modal-product-name').textContent = product.name;
         document.getElementById('modal-product-description').textContent = product.description;
+        
+        // Set modal image
+        const categoryProducts = this.products.filter(p => p.category === product.category);
+        const productIndex = categoryProducts.indexOf(product) + 1;
+        
+        // Use correct file extension
+        let imagePath;
+        if (product.category === 'coffee' && productIndex === 1) {
+            imagePath = `assets/coffee-1.png`;
+        } else {
+            const extension = product.category === 'coffee' ? 'jpg' : 'png';
+            imagePath = `assets/${product.category}-${productIndex}.${extension}`;
+        }
+        
+        document.getElementById('modal-product-image').src = imagePath;
+        document.getElementById('modal-product-image').alt = product.name;
         
         // Setup size options
         this.setupSizeOptions(product);

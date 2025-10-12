@@ -224,7 +224,7 @@ body.menu-open {
 .coffee-image {
     width: 100%;
     height: 200px;
-    background-color: #E1D4C9;
+    object-fit: cover;
     border-radius: 12px;
     margin-bottom: 20px;
 }
@@ -325,7 +325,7 @@ body.menu-open {
 .about-img-1, .about-img-2 {
     width: 300px;
     height: 400px;
-    background-color: #E1D4C9;
+    object-fit: cover;
     border-radius: 12px;
 }
 
@@ -356,23 +356,23 @@ body.menu-open {
 }
 
 .app-btn {
-    padding: 12px 20px;
-    background-color: #403F3D;
-    color: #E1D4C9;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.app-btn img {
+    height: 40px;
+    width: auto;
 }
 
 .app-btn:hover {
-    background-color: #B0907A;
+    transform: scale(1.05);
 }
 
 .mobile-app-image {
     width: 300px;
     height: 400px;
-    background-color: #E1D4C9;
+    object-fit: contain;
     border-radius: 12px;
 }
 
@@ -407,12 +407,20 @@ body.menu-open {
 }
 
 .social-link {
-    color: #E1D4C9;
-    text-decoration: none;
-    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
     border: 1px solid #E1D4C9;
-    border-radius: 100px;
+    border-radius: 50%;
     transition: all 0.3s ease;
+}
+
+.social-link img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
 }
 
 .social-link:hover {
@@ -427,7 +435,16 @@ body.menu-open {
 }
 
 .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 20px;
+}
+
+.contact-item img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
 }
 
 .contact-item a {
@@ -453,6 +470,9 @@ body.menu-open {
 }
 
 .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 8px 16px;
     background-color: transparent;
     border: 1px solid #C1B6AD;
@@ -461,6 +481,11 @@ body.menu-open {
     font-size: 16px;
     color: #403F3D;
     transition: all 0.3s ease;
+}
+
+.tab-btn img {
+    width: 20px;
+    height: 20px;
 }
 
 .tab-btn.active {
@@ -495,7 +520,7 @@ body.menu-open {
 .product-image {
     width: 100%;
     height: 200px;
-    background-color: #E1D4C9;
+    object-fit: cover;
     border-radius: 12px;
     margin-bottom: 20px;
 }
@@ -580,7 +605,7 @@ body.menu-open {
 #modal-product-image {
     width: 100%;
     height: 300px;
-    background-color: #F8F8F6;
+    object-fit: cover;
     border-radius: 12px;
 }
 
