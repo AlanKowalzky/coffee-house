@@ -1,4 +1,4 @@
-// Menu page functionality
+// Menu page fu// Menu functionality
 class MenuManager {
     constructor() {
         this.products = [];
@@ -19,17 +19,25 @@ class MenuManager {
     async loadProducts() {
         try {
             const response = await fetch('products.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
             this.products = await response.json();
         } catch (error) {
             console.error('Error loading products:', error);
+            this.products = [];
         }
     }
     
     setupEventListeners() {
         // Category tabs
-        document.querySelectorAll('.tab-btn').forEach(btn => {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                this.switchCategory(e.target.dataset.category);
+                const category = e.target.closest('.tab-btn')?.dataset?.category;
+                if (category) {
+                    this.switchCategory(category);
+                }
             });
         });
         
@@ -118,12 +126,25 @@ class MenuManager {
             imagePath = `assets/${product.category}-${productIndex}.${extension}`;
         }
         
-        card.innerHTML = `
-            <img src="${imagePath}" alt="${product.name}" class="product-image">
-            <h3>${product.name}</h3>
-            <p>${product.description}</p>
-            <span class="price">$${product.price}</span>
-        `;
+        const img = document.createElement('img');
+        img.src = imagePath;
+        img.alt = this.escapeHtml(product.name);
+        img.className = 'product-image';
+        
+        const title = document.createElement('h3');
+        title.textContent = product.name;
+        
+        const description = document.createElement('p');
+        description.textContent = product.description;
+        
+        const price = document.createElement('span');
+        price.className = 'price';
+        price.textContent = `$${product.price}`;
+        
+        card.appendChild(img);
+        card.appendChild(title);
+        card.appendChild(description);
+        card.appendChild(price);
         
         card.addEventListener('click', () => this.openModal(product));
         
@@ -143,9 +164,12 @@ class MenuManager {
         });
         
         // Prevent modal close when clicking inside modal content
-        document.querySelector('.modal-content').addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+        const modalContent = document.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
     }
     
     openModal(product) {
@@ -200,7 +224,9 @@ class MenuManager {
             btn.className = `option-btn ${index === 0 ? 'active' : ''}`;
             btn.dataset.size = size;
             btn.dataset.price = data['add-price'];
-            btn.innerHTML = `${size.toUpperCase()}<br/>${data.size}`;
+            const sizeText = document.createElement('span');
+            sizeText.innerHTML = `${size.toUpperCase()}<br/>${this.escapeHtml(data.size)}`;
+            btn.appendChild(sizeText);
             
             btn.addEventListener('click', () => {
                 container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
@@ -220,7 +246,9 @@ class MenuManager {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
             btn.dataset.price = additive['add-price'];
-            btn.innerHTML = `${additive.name}<br/>+$${additive['add-price']}`;
+            const additiveText = document.createElement('span');
+            additiveText.innerHTML = `${this.escapeHtml(additive.name)}<br/>+$${additive['add-price']}`;
+            btn.appendChild(additiveText);
             
             btn.addEventListener('click', () => {
                 btn.classList.toggle('active');
@@ -245,11 +273,25 @@ class MenuManager {
             total += parseFloat(btn.dataset.price);
         });
         
-        document.getElementById('total-price').textContent = `$${total.toFixed(2)}`;
+        const totalElement = document.getElementById('total-price');
+        if (totalElement) {
+            totalElement.textContent = `$${total.toFixed(2)}`;
+        }
+    }
+}
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
 // Initialize menu manager when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new MenuManager();
+    try {
+        new MenuManager();
+    } catch (error) {
+        console.error('Failed to initialize MenuManager:', error);
+    }
 });
