@@ -135,6 +135,14 @@ body {
     .nav.active {
         right: 0;
     }
+    
+    .burger {
+        display: flex;
+    }
+    
+    .menu-btn {
+        display: none;
+    }
 }
 
 body.menu-open {
@@ -163,6 +171,7 @@ body.menu-open {
     text-align: center;
     position: relative;
     overflow: hidden;
+    min-height: 100vh;
 }
 
 .enjoy-bg {
@@ -188,12 +197,13 @@ body.menu-open {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: -1;
+    z-index: 0;
+    opacity: 0.7;
 }
 
 .enjoy-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
 }
 
 .enjoy-title {
