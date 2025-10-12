@@ -1,0 +1,225 @@
+// Menu page functionality
+class MenuManager {
+    constructor() {
+        this.products = [];
+        this.currentCategory = 'coffee';
+        this.displayedProducts = [];
+        this.isMobile = window.innerWidth <= 768;
+        
+        this.init();
+    }
+    
+    async init() {
+        await this.loadProducts();
+        this.setupEventListeners();
+        this.displayProducts();
+        this.setupModal();
+    }
+    
+    async loadProducts() {
+        try {
+            const response = await fetch('products.json');
+            this.products = await response.json();
+        } catch (error) {
+            console.error('Error loading products:', error);
+        }
+    }
+    
+    setupEventListeners() {
+        // Category tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.switchCategory(e.target.dataset.category);
+            });
+        });
+        
+        // Load more button
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', () => this.loadMoreProducts());
+        }
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            const wasMobile = this.isMobile;
+            this.isMobile = window.innerWidth <= 768;
+            
+            if (wasMobile !== this.isMobile) {
+                this.displayProducts();
+            }
+        });
+    }
+    
+    switchCategory(category) {
+        this.currentCategory = category;
+        
+        // Update active tab
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-category="${category}"]`).classList.add('active');
+        
+        this.displayProducts();
+    }
+    
+    displayProducts() {
+        const categoryProducts = this.products.filter(p => p.category === this.currentCategory);
+        const grid = document.getElementById('menu-grid');
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        
+        grid.innerHTML = '';
+        
+        const maxProducts = this.isMobile ? 4 : categoryProducts.length;
+        this.displayedProducts = categoryProducts.slice(0, maxProducts);
+        
+        this.displayedProducts.forEach(product => {
+            const card = this.createProductCard(product);
+            grid.appendChild(card);
+        });
+        
+        // Show/hide load more button
+        if (this.isMobile && categoryProducts.length > 4) {
+            loadMoreBtn.style.display = this.displayedProducts.length < categoryProducts.length ? 'block' : 'none';
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
+    }
+    
+    loadMoreProducts() {
+        const categoryProducts = this.products.filter(p => p.category === this.currentCategory);
+        const grid = document.getElementById('menu-grid');
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        
+        const remainingProducts = categoryProducts.slice(this.displayedProducts.length);
+        
+        remainingProducts.forEach(product => {
+            const card = this.createProductCard(product);
+            grid.appendChild(card);
+        });
+        
+        this.displayedProducts = categoryProducts;
+        loadMoreBtn.style.display = 'none';
+    }
+    
+    createProductCard(product) {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+            <div class="product-image"></div>
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <span class="price">$${product.price}</span>
+        `;
+        
+        card.addEventListener('click', () => this.openModal(product));
+        
+        return card;
+    }
+    
+    setupModal() {
+        const modal = document.getElementById('product-modal');
+        const overlay = document.querySelector('.modal-overlay');
+        const closeBtn = document.querySelector('.modal-close');
+        
+        // Close modal events
+        [overlay, closeBtn].forEach(element => {
+            if (element) {
+                element.addEventListener('click', () => this.closeModal());
+            }
+        });
+        
+        // Prevent modal close when clicking inside modal content
+        document.querySelector('.modal-content').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+    
+    openModal(product) {
+        const modal = document.getElementById('product-modal');
+        
+        // Populate modal content
+        document.getElementById('modal-product-name').textContent = product.name;
+        document.getElementById('modal-product-description').textContent = product.description;
+        
+        // Setup size options
+        this.setupSizeOptions(product);
+        
+        // Setup additives options
+        this.setupAdditivesOptions(product);
+        
+        // Calculate initial price
+        this.updateTotalPrice(product);
+        
+        // Show modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    closeModal() {
+        const modal = document.getElementById('product-modal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    setupSizeOptions(product) {
+        const container = document.getElementById('size-options');
+        container.innerHTML = '';
+        
+        Object.entries(product.sizes).forEach(([size, data], index) => {
+            const btn = document.createElement('button');
+            btn.className = `option-btn ${index === 0 ? 'active' : ''}`;
+            btn.dataset.size = size;
+            btn.dataset.price = data['add-price'];
+            btn.innerHTML = `${size.toUpperCase()}<br/>${data.size}`;
+            
+            btn.addEventListener('click', () => {
+                container.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.updateTotalPrice(product);
+            });
+            
+            container.appendChild(btn);
+        });
+    }
+    
+    setupAdditivesOptions(product) {
+        const container = document.getElementById('additives-options');
+        container.innerHTML = '';
+        
+        product.additives.forEach(additive => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.dataset.price = additive['add-price'];
+            btn.innerHTML = `${additive.name}<br/>+$${additive['add-price']}`;
+            
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                this.updateTotalPrice(product);
+            });
+            
+            container.appendChild(btn);
+        });
+    }
+    
+    updateTotalPrice(product) {
+        let total = parseFloat(product.price);
+        
+        // Add size price
+        const activeSize = document.querySelector('#size-options .option-btn.active');
+        if (activeSize) {
+            total += parseFloat(activeSize.dataset.price);
+        }
+        
+        // Add additives prices
+        document.querySelectorAll('#additives-options .option-btn.active').forEach(btn => {
+            total += parseFloat(btn.dataset.price);
+        });
+        
+        document.getElementById('total-price').textContent = `$${total.toFixed(2)}`;
+    }
+}
+
+// Initialize menu manager when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new MenuManager();
+});
