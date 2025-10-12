@@ -155,6 +155,17 @@ body.menu-open {
     overflow: hidden;
 }
 
+.enjoy-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.3;
+}
+
 .enjoy-title {
     font-size: 72px;
     font-weight: 600;
