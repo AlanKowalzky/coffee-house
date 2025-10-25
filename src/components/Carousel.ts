@@ -89,12 +89,14 @@ export class Carousel {
     let endX = 0;
     
     if (carouselContainer) {
-      carouselContainer.addEventListener('touchstart', (e: TouchEvent) => {
-        startX = e.touches[0].clientX;
+      carouselContainer.addEventListener('touchstart', (e: Event) => {
+        const touchEvent = e as TouchEvent;
+        startX = touchEvent.touches[0].clientX;
       });
       
-      carouselContainer.addEventListener('touchend', (e: TouchEvent) => {
-        endX = e.changedTouches[0].clientX;
+      carouselContainer.addEventListener('touchend', (e: Event) => {
+        const touchEvent = e as TouchEvent;
+        endX = touchEvent.changedTouches[0].clientX;
         const diff = startX - endX;
         
         if (Math.abs(diff) > 50) {
