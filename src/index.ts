@@ -2,6 +2,8 @@ import { ApiService } from './services/ApiService';
 import { Auth } from './components/Auth';
 import { Cart } from './components/Cart';
 import { ProductModal } from './components/ProductModal';
+import { Menu } from './components/Menu';
+import { Carousel } from './components/Carousel';
 import { Product, ProductCategory } from './types/api';
 
 // Import styles
@@ -13,22 +15,31 @@ class App {
   private auth: Auth;
   private cart: Cart;
   private productModal: ProductModal;
+  private menu: Menu;
+  private carousel: Carousel;
 
   constructor() {
     this.apiService = new ApiService();
     this.cart = new Cart(this.apiService);
     this.auth = new Auth(this.apiService);
     this.productModal = new ProductModal(this.cart);
+    this.menu = new Menu();
+    this.carousel = new Carousel();
     this.init();
   }
 
   private init(): void {
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('Coffee House Business App initialized');
+        this.initializeComponents();
+        this.enhanceExistingMenu();
+      });
+    } else {
       console.log('Coffee House Business App initialized');
-      
       this.initializeComponents();
       this.enhanceExistingMenu();
-    });
+    }
   }
 
   private initializeComponents(): void {

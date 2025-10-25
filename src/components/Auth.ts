@@ -20,13 +20,13 @@ export class Auth {
       <div class="auth-modal" id="loginModal">
         <div class="auth-content">
           <span class="auth-close">&times;</span>
-          <h2>Zaloguj się</h2>
+          <h2>Login</h2>
           <form id="loginForm">
             <input type="email" id="loginEmail" placeholder="Email" required>
-            <input type="password" id="loginPassword" placeholder="Hasło" required>
-            <button type="submit">Zaloguj</button>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button type="submit">Login</button>
           </form>
-          <p>Nie masz konta? <a href="#" id="showRegister">Zarejestruj się</a></p>
+          <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
         </div>
       </div>
     `;
@@ -37,14 +37,14 @@ export class Auth {
       <div class="auth-modal" id="registerModal">
         <div class="auth-content">
           <span class="auth-close">&times;</span>
-          <h2>Zarejestruj się</h2>
+          <h2>Register</h2>
           <form id="registerForm">
-            <input type="text" id="registerName" placeholder="Imię" required>
+            <input type="text" id="registerName" placeholder="Name" required>
             <input type="email" id="registerEmail" placeholder="Email" required>
-            <input type="password" id="registerPassword" placeholder="Hasło" required>
-            <button type="submit">Zarejestruj</button>
+            <input type="password" id="registerPassword" placeholder="Password" required>
+            <button type="submit">Register</button>
           </form>
-          <p>Masz już konto? <a href="#" id="showLogin">Zaloguj się</a></p>
+          <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
         </div>
       </div>
     `;
@@ -61,11 +61,11 @@ export class Auth {
       const authButtons = document.createElement('div');
       authButtons.className = 'auth-buttons';
       authButtons.innerHTML = `
-        <button id="loginBtn" class="auth-btn">Zaloguj</button>
-        <button id="registerBtn" class="auth-btn">Zarejestruj</button>
+        <button id="loginBtn" class="auth-btn">Login</button>
+        <button id="registerBtn" class="auth-btn">Register</button>
         <div id="userInfo" class="user-info" style="display: none;">
           <span id="userName"></span>
-          <button id="logoutBtn" class="auth-btn">Wyloguj</button>
+          <button id="logoutBtn" class="auth-btn">Logout</button>
         </div>
       `;
       header.appendChild(authButtons);
@@ -123,7 +123,7 @@ export class Auth {
     const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
 
     if (!validateEmail(email) || !validatePassword(password)) {
-      this.errorMessage.show('Nieprawidłowy email lub hasło');
+      this.errorMessage.show('Invalid email or password');
       return;
     }
 
@@ -134,7 +134,7 @@ export class Auth {
       this.updateUserInterface(response.login);
       this.closeModals();
     } catch (error) {
-      this.errorMessage.show('Błąd logowania');
+      this.errorMessage.show('Login error');
     } finally {
       this.loader.hide();
     }
@@ -146,7 +146,7 @@ export class Auth {
     const password = (document.getElementById('registerPassword') as HTMLInputElement).value;
 
     if (!validateEmail(email) || !validatePassword(password) || !name.trim()) {
-      this.errorMessage.show('Wypełnij wszystkie pola poprawnie');
+      this.errorMessage.show('Please fill all fields correctly');
       return;
     }
 
@@ -162,10 +162,10 @@ export class Auth {
         paymentMethod: PaymentMethod.CASH
       };
       await this.apiService.register(registerData);
-      this.errorMessage.show('Rejestracja udana! Możesz się zalogować');
+      this.errorMessage.show('Registration successful! You can now login');
       this.switchToLogin();
     } catch (error) {
-      this.errorMessage.show('Błąd rejestracji');
+      this.errorMessage.show('Registration error');
     } finally {
       this.loader.hide();
     }

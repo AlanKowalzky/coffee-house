@@ -72,15 +72,15 @@ export class Cart {
       <div class="cart-item">
         <div class="cart-item-info">
           <h4>${item.product.name}</h4>
-          <p>Rozmiar: ${item.size.name}</p>
-          ${item.additives.length > 0 ? `<p>Dodatki: ${item.additives.map(a => a.name).join(', ')}</p>` : ''}
+          <p>Size: ${item.size.name}</p>
+          ${item.additives.length > 0 ? `<p>Additives: ${item.additives.map(a => a.name).join(', ')}</p>` : ''}
           <p class="cart-item-price">$${(item.totalPrice / item.quantity).toFixed(2)}</p>
         </div>
         <div class="cart-item-controls">
           <button onclick="cart.updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
           <span>${item.quantity}</span>
           <button onclick="cart.updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
-          <button onclick="cart.removeItem('${item.id}')" class="remove-btn">Usuń</button>
+          <button onclick="cart.removeItem('${item.id}')" class="remove-btn">Remove</button>
         </div>
       </div>
     `).join('');
@@ -89,14 +89,14 @@ export class Cart {
       <div class="cart-modal" id="cartModal">
         <div class="cart-content">
           <span class="cart-close">&times;</span>
-          <h2>Koszyk</h2>
+          <h2>Cart</h2>
           <div class="cart-items">
-            ${this.items.length > 0 ? itemsHtml : '<p>Koszyk jest pusty</p>'}
+            ${this.items.length > 0 ? itemsHtml : '<p>Cart is empty</p>'}
           </div>
           ${this.items.length > 0 ? `
             <div class="cart-total">
-              <h3>Razem: $${this.getTotal().toFixed(2)}</h3>
-              <button id="checkoutBtn" class="checkout-btn">Zamów</button>
+              <h3>Total: $${this.getTotal().toFixed(2)}</h3>
+              <button id="checkoutBtn" class="checkout-btn">Order</button>
             </div>
           ` : ''}
         </div>
@@ -116,7 +116,7 @@ export class Cart {
       cartButton.className = 'cart-button';
       cartButton.innerHTML = `
         <button id="cartBtn" class="cart-btn">
-          🛒 Koszyk (<span id="cartCount">0</span>)
+          🛒 Cart (<span id="cartCount">0</span>)
         </button>
       `;
       header.appendChild(cartButton);
@@ -145,7 +145,7 @@ export class Cart {
   private async checkout(): Promise<void> {
     const user = localStorage.getItem('user');
     if (!user) {
-      alert('Musisz się zalogować, aby złożyć zamówienie');
+      alert('You must login to place an order');
       return;
     }
 
@@ -161,13 +161,13 @@ export class Cart {
         }
       };
       await this.apiService.placeOrder(orderData);
-      alert('Zamówienie zostało złożone!');
+      alert('Order placed successfully!');
       this.items = [];
       this.saveCart();
       this.updateCartDisplay();
       this.closeCartModal();
     } catch (error) {
-      alert('Błąd podczas składania zamówienia');
+      alert('Error placing order');
     }
   }
 
