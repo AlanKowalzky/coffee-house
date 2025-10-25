@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -24,6 +25,13 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|jpg|jpeg|gif|svg|mp4)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext]'
+        }
       }
     ]
   },
@@ -37,6 +45,12 @@ module.exports = {
       template: './menu.html',
       filename: 'menu.html',
       chunks: ['menu']
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'assets', to: 'assets' },
+        { from: 'styles', to: 'styles' }
+      ]
     })
   ],
   devServer: {

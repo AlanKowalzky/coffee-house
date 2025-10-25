@@ -8,124 +8,111 @@ export class ProductModal {
     this.cart = cart;
   }
 
-  public renderModal(product: Product): string {
-    return `
-      <div class="modal" id="productModal">
-        <div class="modal-content">
-          <span class="modal-close">&times;</span>
-          <div class="modal-body">
-            <img src="assets/menu/${product.name.toLowerCase().replace(/\s+/g, '-')}.jpg" alt="${product.name}">
-            <div class="modal-info">
-              <h3>${product.name}</h3>
-              <p>${product.description}</p>
-              
-              <div class="size-selection">
-                <h4>Rozmiar</h4>
-                <div class="size-options">
-                  <label><input type="radio" name="size" value="S" checked> S <span class="size-price">$${product.price.toFixed(2)}</span></label>
-                  <label><input type="radio" name="size" value="M"> M <span class="size-price">$${(product.price + 0.50).toFixed(2)}</span></label>
-                  <label><input type="radio" name="size" value="L"> L <span class="size-price">$${(product.price + 1.00).toFixed(2)}</span></label>
-                </div>
-              </div>
-
-              <div class="additives-selection">
-                <h4>Dodatki</h4>
-                <div class="additives-options">
-                  <label><input type="checkbox" name="additive" value="Dodatkowy shot"> Dodatkowy shot <span class="additive-price">+$0.50</span></label>
-                  <label><input type="checkbox" name="additive" value="Mleko kokosowe"> Mleko kokosowe <span class="additive-price">+$0.50</span></label>
-                  <label><input type="checkbox" name="additive" value="Syrop waniliowy"> Syrop waniliowy <span class="additive-price">+$0.50</span></label>
-                  <label><input type="checkbox" name="additive" value="Śmietanka"> Śmietanka <span class="additive-price">+$0.50</span></label>
-                </div>
-              </div>
-
-              <div class="modal-footer">
-                <div class="total-price">
-                  Razem: $<span id="modalTotalPrice">${product.price.toFixed(2)}</span>
-                </div>
-                <button id="addToCartBtn" class="add-to-cart-btn">Dodaj do koszyka</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
   public showModal(product: Product): void {
-    document.body.insertAdjacentHTML('beforeend', this.renderModal(product));
+    const existingModal = document.getElementById('product-modal');
+    if (existingModal) existingModal.remove();
+    
+    const modal = document.getElementById('product-modal');
+    if (!modal) return;
+    
+    // Update modal content
+    const modalImage = document.getElementById('modal-product-image') as HTMLImageElement;
+    const modalName = document.getElementById('modal-product-name');
+    const modalDescription = document.getElementById('modal-product-description');
+    const sizeOptions = document.getElementById('size-options');
+    const additivesOptions = document.getElementById('additives-options');
+    const totalPrice = document.getElementById('total-price');
+    
+    if (modalImage) modalImage.src = `assets/${product.image}`;
+    if (modalName) modalName.textContent = product.name;
+    if (modalDescription) modalDescription.textContent = product.description;
+    
+    // Render size options
+    if (sizeOptions) {
+      sizeOptions.innerHTML = product.sizes.map((size, index) => `
+        <button class="option-btn ${index === 0 ? 'active' : ''}" data-size="${size.id}" data-price="${size.price}">
+          <span class="option-icon">S</span>
+          <span class="option-text">${size.name}</span>
+        </button>
+      `).join('');
+    }
+    
+    // Render additive options
+    if (additivesOptions) {
+      additivesOptions.innerHTML = product.additives.map(additive => `
+        <button class="option-btn" data-additive="${additive.id}" data-price="${additive.price}">
+          <span class="option-icon">1</span>
+          <span class="option-text">${additive.name}</span>
+        </button>
+      `).join('');
+    }
+    
+    // Set initial price
+    if (totalPrice) totalPrice.textContent = `$${product.price.toFixed(2)}`;
+    
+    // Show modal
+    modal.style.display = 'flex';
+    
     this.bindModalEvents(product);
-    this.updatePrice(product);
   }
+
+
 
   private bindModalEvents(product: Product): void {
-    const modal = document.getElementById('productModal');
+    const modal = document.getElementById('product-modal');
     if (!modal) return;
 
-    // Zamknij modal
-    modal.querySelector('.modal-close')?.addEventListener('click', () => {
-      modal.remove();
+    // Close modal
+    const closeBtn = modal.querySelector('.modal-close');
+    const overlay = modal.querySelector('.modal-overlay');
+    
+    const closeModal = () => {
+      modal.style.display = 'none';
+    };
+    
+    closeBtn?.addEventListener('click', closeModal);
+    overlay?.addEventListener('click', closeModal);
+
+    // Size selection
+    modal.querySelectorAll('[data-size]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        modal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.updatePrice(product, modal);
+      });
     });
 
-    // Kliknięcie poza modal
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.remove();
-      }
-    });
-
-    // Aktualizuj cenę przy zmianie opcji
-    modal.querySelectorAll('input[name="size"], input[name="additive"]').forEach(input => {
-      input.addEventListener('change', () => this.updatePrice(product));
-    });
-
-    // Dodaj do koszyka
-    modal.querySelector('#addToCartBtn')?.addEventListener('click', () => {
-      this.addToCart(product);
-      modal.remove();
+    // Additive selection
+    modal.querySelectorAll('[data-additive]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('active');
+        this.updatePrice(product, modal);
+      });
     });
   }
 
-  private updatePrice(product: Product): void {
-    const modal = document.getElementById('productModal');
-    if (!modal) return;
-
-    const selectedSize = (modal.querySelector('input[name="size"]:checked') as HTMLInputElement)?.value || 'S';
-    const selectedAdditives = Array.from(modal.querySelectorAll('input[name="additive"]:checked'))
-      .map(input => (input as HTMLInputElement).value);
-
+  private updatePrice(product: Product, modal: Element): void {
     let totalPrice = product.price;
 
-    // Dodaj cenę za rozmiar
-    if (selectedSize === 'M') totalPrice += 0.50;
-    if (selectedSize === 'L') totalPrice += 1.00;
+    // Add size price
+    const activeSize = modal.querySelector('[data-size].active');
+    if (activeSize) {
+      const sizePrice = parseFloat(activeSize.getAttribute('data-price') || '0');
+      totalPrice += sizePrice;
+    }
 
-    // Dodaj cenę za dodatki
-    totalPrice += selectedAdditives.length * 0.50;
+    // Add additive prices
+    const activeAdditives = modal.querySelectorAll('[data-additive].active');
+    activeAdditives.forEach(additive => {
+      const additivePrice = parseFloat(additive.getAttribute('data-price') || '0');
+      totalPrice += additivePrice;
+    });
 
-    const totalPriceElement = modal.querySelector('#modalTotalPrice');
+    const totalPriceElement = modal.querySelector('#total-price');
     if (totalPriceElement) {
-      totalPriceElement.textContent = totalPrice.toFixed(2);
+      totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
     }
   }
 
-  private addToCart(product: Product): void {
-    const modal = document.getElementById('productModal');
-    if (!modal) return;
 
-    const selectedSize = (modal.querySelector('input[name="size"]:checked') as HTMLInputElement)?.value || 'S';
-    const selectedAdditives = Array.from(modal.querySelectorAll('input[name="additive"]:checked'))
-      .map(input => (input as HTMLInputElement).value);
-
-    this.cart.addItem(product, selectedSize, selectedAdditives);
-    
-    // Pokaż komunikat o dodaniu do koszyka
-    const notification = document.createElement('div');
-    notification.className = 'cart-notification';
-    notification.textContent = 'Produkt dodany do koszyka!';
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.remove();
-    }, 2000);
-  }
 }

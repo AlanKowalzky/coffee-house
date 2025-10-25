@@ -4,6 +4,7 @@ import { Cart } from './components/Cart';
 import { ProductModal } from './components/ProductModal';
 import { Menu } from './components/Menu';
 import { Carousel } from './components/Carousel';
+import { BurgerMenu } from './components/BurgerMenu';
 import { Product, ProductCategory } from './types/api';
 
 // Import styles
@@ -17,6 +18,7 @@ class App {
   private productModal: ProductModal;
   private menu: Menu;
   private carousel: Carousel;
+  private burgerMenu: BurgerMenu;
 
   constructor() {
     this.apiService = new ApiService();
@@ -25,6 +27,7 @@ class App {
     this.productModal = new ProductModal(this.cart);
     this.menu = new Menu();
     this.carousel = new Carousel();
+    this.burgerMenu = new BurgerMenu();
     this.init();
   }
 

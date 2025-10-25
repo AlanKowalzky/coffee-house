@@ -3,6 +3,7 @@ import { Auth } from './components/Auth';
 import { Cart } from './components/Cart';
 import { ProductModal } from './components/ProductModal';
 import { Menu } from './components/Menu';
+import { BurgerMenu } from './components/BurgerMenu';
 import { Product, ProductCategory } from './types/api';
 
 // Import styles
@@ -15,6 +16,7 @@ class MenuApp {
   private cart: Cart;
   private productModal: ProductModal;
   private menu: Menu;
+  private burgerMenu: BurgerMenu;
   private products: Product[] = [];
   private currentCategory: ProductCategory = ProductCategory.COFFEE;
   private displayedCount: number = 4;
@@ -25,6 +27,7 @@ class MenuApp {
     this.auth = new Auth(this.apiService);
     this.productModal = new ProductModal(this.cart);
     this.menu = new Menu();
+    this.burgerMenu = new BurgerMenu();
     this.init();
   }
 
@@ -70,7 +73,7 @@ class MenuApp {
         description: 'Fragrant black coffee with Jameson Irish whiskey and whipped milk',
         price: 7.00,
         category: ProductCategory.COFFEE,
-        image: 'coffee-1.png',
+        image: 'coffee-1.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
           { id: 'M', name: 'Medium', price: 0.50 },
@@ -88,7 +91,7 @@ class MenuApp {
         description: 'Classic coffee with milk and Kahlua liqueur under a cap of frothed milk',
         price: 7.00,
         category: ProductCategory.COFFEE,
-        image: 'coffee-2.png',
+        image: 'coffee-2.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
           { id: 'M', name: 'Medium', price: 0.50 },
@@ -106,7 +109,7 @@ class MenuApp {
         description: 'Espresso with frothed milk and natural honey',
         price: 5.50,
         category: ProductCategory.COFFEE,
-        image: 'coffee-3.png',
+        image: 'coffee-3.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
           { id: 'M', name: 'Medium', price: 0.50 },
@@ -124,7 +127,7 @@ class MenuApp {
         description: 'Classic black coffee made from freshly ground beans',
         price: 4.50,
         category: ProductCategory.COFFEE,
-        image: 'coffee-4.png',
+        image: 'coffee-4.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
           { id: 'M', name: 'Medium', price: 0.50 },
@@ -134,6 +137,38 @@ class MenuApp {
           { id: 'sugar', name: 'Sugar', price: 0 },
           { id: 'cinnamon', name: 'Cinnamon', price: 0.50 },
           { id: 'syrup', name: 'Syrup', price: 0.50 }
+        ]
+      },
+      {
+        id: '5',
+        name: 'Green Tea',
+        description: 'Fresh green tea with natural antioxidants',
+        price: 3.50,
+        category: ProductCategory.TEA,
+        image: 'tea-1.png',
+        sizes: [
+          { id: 'S', name: 'Small', price: 0 },
+          { id: 'M', name: 'Medium', price: 0.50 },
+          { id: 'L', name: 'Large', price: 1.00 }
+        ],
+        additives: [
+          { id: 'honey', name: 'Honey', price: 0.50 },
+          { id: 'lemon', name: 'Lemon', price: 0.30 }
+        ]
+      },
+      {
+        id: '6',
+        name: 'Chocolate Cake',
+        description: 'Rich chocolate cake with cream frosting',
+        price: 4.50,
+        category: ProductCategory.DESSERT,
+        image: 'dessert-1.png',
+        sizes: [
+          { id: 'S', name: 'Small', price: 0 },
+          { id: 'L', name: 'Large', price: 1.50 }
+        ],
+        additives: [
+          { id: 'berries', name: 'Berries', price: 0.50 }
         ]
       }
     ];
@@ -148,7 +183,7 @@ class MenuApp {
 
     menuGrid.innerHTML = productsToShow.map(product => `
       <div class="menu-item" data-product-id="${product.id}">
-        <img src="assets/menu/${product.image}" alt="${product.name}" class="menu-item-image">
+        <img src="assets/${product.image}" alt="${product.name}" class="menu-item-image">
         <div class="menu-item-info">
           <h3 class="menu-item-name">${product.name}</h3>
           <p class="menu-item-description">${product.description}</p>
