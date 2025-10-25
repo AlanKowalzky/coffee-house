@@ -18,7 +18,7 @@ export class ProductModal {
     
     console.log('Modal found, showing...');
     // Show modal first
-    modal.style.display = 'flex';
+    modal.classList.add('show');
     document.body.style.overflow = 'hidden';
     
     // Update modal content after showing
@@ -43,11 +43,20 @@ export class ProductModal {
       if (modalImage) {
         const imagePath = `assets/${product.image}`;
         console.log('Setting image src to:', imagePath);
+        console.log('Current modalImage src before:', modalImage.src);
         modalImage.src = imagePath;
         modalImage.alt = product.name;
+        console.log('Current modalImage src after:', modalImage.src);
         
-        modalImage.onload = () => console.log('Image loaded successfully:', imagePath);
-        modalImage.onerror = () => console.log('Image failed to load:', imagePath);
+        modalImage.onload = () => {
+          console.log('Image loaded successfully:', imagePath);
+          console.log('Image dimensions:', modalImage.naturalWidth, 'x', modalImage.naturalHeight);
+        };
+        modalImage.onerror = (e) => {
+          console.log('Image failed to load:', imagePath, e);
+          console.log('Trying fallback image...');
+          modalImage.src = 'assets/coffee-1.jpg';
+        };
       } else {
         console.log('Modal image element not found!');
       }
@@ -83,10 +92,10 @@ export class ProductModal {
       
       // Set initial price
       if (totalPrice) totalPrice.textContent = `$${product.price.toFixed(2)}`;
+      
+      // Bind events after content is rendered
+      this.bindModalEvents(product);
     }, 10);
-    
-    // Bind events
-    this.bindModalEvents(product);
   }
 
 
@@ -95,7 +104,7 @@ export class ProductModal {
     console.log('Closing modal');
     const modal = document.getElementById('product-modal');
     if (modal) {
-      modal.style.display = 'none';
+      modal.classList.remove('show');
       document.body.style.overflow = 'auto';
     }
   }
@@ -103,36 +112,53 @@ export class ProductModal {
 
 
   private bindModalEvents(product: Product): void {
+    const modal = document.getElementById('product-modal');
+    if (!modal) return;
+
     console.log('Binding modal events...');
-    // Simple direct event binding
-    document.addEventListener('click', (e) => {
+
+    // Use single event listener with event delegation
+    const handleModalClick = (e: Event) => {
       const target = e.target as HTMLElement;
-      console.log('Document click on:', target.className, target.tagName);
       
       // Close modal
       if (target.classList.contains('modal-close') || target.classList.contains('modal-overlay')) {
-        console.log('Close button or overlay clicked!');
         this.closeModal();
+        modal.removeEventListener('click', handleModalClick);
+        return;
+      }
+      
+      // Add to cart
+      if (target.id === 'add-to-cart') {
+        this.addToCart(product, modal);
+        this.closeModal();
+        modal.removeEventListener('click', handleModalClick);
         return;
       }
       
       // Size selection
-      if (target.closest('[data-size]')) {
-        const btn = target.closest('[data-size]') as HTMLElement;
-        document.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.updatePrice(product, document.getElementById('product-modal')!);
-        return;
+      if (target.hasAttribute('data-size') || target.parentElement?.hasAttribute('data-size')) {
+        const sizeBtn = target.hasAttribute('data-size') ? target : target.parentElement;
+        if (sizeBtn) {
+          console.log('Size button clicked:', sizeBtn.getAttribute('data-size'));
+          modal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+          sizeBtn.classList.add('active');
+          this.updatePrice(product, modal);
+        }
       }
       
       // Additive selection
-      if (target.closest('[data-additive]')) {
-        const btn = target.closest('[data-additive]') as HTMLElement;
-        btn.classList.toggle('active');
-        this.updatePrice(product, document.getElementById('product-modal')!);
-        return;
+      if (target.hasAttribute('data-additive') || target.parentElement?.hasAttribute('data-additive')) {
+        const additiveBtn = target.hasAttribute('data-additive') ? target : target.parentElement;
+        if (additiveBtn) {
+          console.log('Additive button clicked:', additiveBtn.getAttribute('data-additive'));
+          additiveBtn.classList.toggle('active');
+          this.updatePrice(product, modal);
+        }
       }
-    });
+    };
+
+    modal.addEventListener('click', handleModalClick);
   }
 
   private updatePrice(product: Product, modal: Element): void {
@@ -156,6 +182,28 @@ export class ProductModal {
     if (totalPriceElement) {
       totalPriceElement.textContent = `$${totalPrice.toFixed(2)}`;
     }
+  }
+
+  private addToCart(product: Product, modal: Element): void {
+    const activeSize = modal.querySelector('[data-size].active');
+    const activeAdditives = modal.querySelectorAll('[data-additive].active');
+    
+    const size = activeSize?.getAttribute('data-size') || 'S';
+    const additives = Array.from(activeAdditives).map(additive => 
+      additive.getAttribute('data-additive') || ''
+    );
+    
+    this.cart.addItem(product, size, additives);
+    
+    // Show notification
+    const notification = document.createElement('div');
+    notification.className = 'cart-notification';
+    notification.textContent = 'Produkt dodany do koszyka!';
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.remove();
+    }, 2000);
   }
 
 

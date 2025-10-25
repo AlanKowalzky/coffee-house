@@ -58,23 +58,6 @@ export class ApiService {
       },
       {
         id: '3',
-        name: 'Green Tea',
-        description: 'Fresh green tea with natural antioxidants',
-        price: 3.50,
-        category: 'tea' as any,
-        image: 'tea-1.png',
-        sizes: [
-          { id: 'S', name: 'Small', price: 0 },
-          { id: 'M', name: 'Medium', price: 0.50 },
-          { id: 'L', name: 'Large', price: 1.00 }
-        ],
-        additives: [
-          { id: 'honey', name: 'Honey', price: 0.50 },
-          { id: 'lemon', name: 'Lemon', price: 0.30 }
-        ]
-      },
-      {
-        id: '3',
         name: 'Honey cappuccino',
         description: 'Espresso with frothed milk and natural honey',
         price: 5.50,
