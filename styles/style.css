@@ -573,7 +573,7 @@ body.menu-open {
 
 /* Modal styles */
 .modal {
-    display: none;
+    display: none !important;
     position: fixed;
     top: 0;
     left: 0;
@@ -582,6 +582,10 @@ body.menu-open {
     z-index: 10000;
     align-items: center;
     justify-content: center;
+}
+
+.modal.show {
+    display: flex !important;
 }
 
 .modal-overlay {

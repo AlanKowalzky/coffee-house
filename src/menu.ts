@@ -175,11 +175,17 @@ class MenuApp {
   }
 
   private displayProducts(): void {
+    console.log('Displaying products:', this.products.length, 'Category:', this.currentCategory);
     const menuGrid = document.getElementById('menu-grid');
-    if (!menuGrid) return;
+    if (!menuGrid) {
+      console.log('Menu grid not found!');
+      return;
+    }
 
     const filteredProducts = this.products.filter(product => product.category === this.currentCategory);
+    console.log('Filtered products:', filteredProducts.length, 'for category:', this.currentCategory);
     const productsToShow = filteredProducts.slice(0, this.displayedCount);
+    console.log('Products to show:', productsToShow.length, 'Display count:', this.displayedCount);
 
     menuGrid.innerHTML = productsToShow.map(product => `
       <div class="menu-item" data-product-id="${product.id}">
@@ -191,6 +197,8 @@ class MenuApp {
         </div>
       </div>
     `).join('');
+
+    console.log('Menu grid HTML updated');
 
     // Show/hide load more button
     const loadMoreBtn = document.getElementById('load-more-btn');
@@ -209,15 +217,27 @@ class MenuApp {
       });
     });
 
-    // Menu items
+    // Menu items - use document delegation since menu-grid content changes
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+      
+      // Skip modal clicks
+      if (target.closest('.modal')) {
+        console.log('Modal click ignored');
+        return;
+      }
+      
+      console.log('Document click on:', target.className, target.tagName);
       const menuItem = target.closest('.menu-item') as HTMLElement;
       
       if (menuItem) {
+        console.log('Menu item clicked!');
         const productId = menuItem.getAttribute('data-product-id');
+        console.log('Product ID:', productId);
         const product = this.products.find(p => p.id === productId);
+        console.log('Found product:', product?.name);
         if (product) {
+          console.log('Calling showModal...');
           this.productModal.showModal(product);
         }
       }
