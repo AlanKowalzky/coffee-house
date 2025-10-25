@@ -10,24 +10,27 @@ export class Cart {
     this.loadCart();
   }
 
-  public addItem(product: Product, size: string, additives: string[]): void {
+  public addItem(product: Product, sizeId: string, additiveIds: string[]): void {
+    const size = product.sizes.find(s => s.id === sizeId) || product.sizes[0];
+    const additives = product.additives.filter(a => additiveIds.includes(a.id));
+    
     const existingItem = this.items.find(item => 
-      item.productId === product.id && 
-      item.size === size && 
-      JSON.stringify(item.additives) === JSON.stringify(additives)
+      item.product.id === product.id && 
+      item.size.id === size.id && 
+      JSON.stringify(item.additives.map(a => a.id)) === JSON.stringify(additives.map(a => a.id))
     );
 
     if (existingItem) {
       existingItem.quantity += 1;
+      existingItem.totalPrice = this.calculatePrice(product, size, additives) * existingItem.quantity;
     } else {
       this.items.push({
         id: Date.now().toString(),
-        productId: product.id,
-        name: product.name,
-        price: this.calculatePrice(product, size, additives),
+        product,
         size,
         additives,
-        quantity: 1
+        quantity: 1,
+        totalPrice: this.calculatePrice(product, size, additives)
       });
     }
 
@@ -47,7 +50,9 @@ export class Cart {
       if (quantity <= 0) {
         this.removeItem(itemId);
       } else {
+        const unitPrice = item.totalPrice / item.quantity;
         item.quantity = quantity;
+        item.totalPrice = unitPrice * quantity;
         this.saveCart();
         this.updateCartDisplay();
       }
@@ -55,7 +60,7 @@ export class Cart {
   }
 
   public getTotal(): number {
-    return this.items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return this.items.reduce((total, item) => total + item.totalPrice, 0);
   }
 
   public getItemCount(): number {
@@ -66,10 +71,10 @@ export class Cart {
     const itemsHtml = this.items.map(item => `
       <div class="cart-item">
         <div class="cart-item-info">
-          <h4>${item.name}</h4>
-          <p>Rozmiar: ${item.size}</p>
-          ${item.additives.length > 0 ? `<p>Dodatki: ${item.additives.join(', ')}</p>` : ''}
-          <p class="cart-item-price">$${item.price.toFixed(2)}</p>
+          <h4>${item.product.name}</h4>
+          <p>Rozmiar: ${item.size.name}</p>
+          ${item.additives.length > 0 ? `<p>Dodatki: ${item.additives.map(a => a.name).join(', ')}</p>` : ''}
+          <p class="cart-item-price">$${(item.totalPrice / item.quantity).toFixed(2)}</p>
         </div>
         <div class="cart-item-controls">
           <button onclick="cart.updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
@@ -145,7 +150,17 @@ export class Cart {
     }
 
     try {
-      await this.apiService.createOrder(this.items);
+      const userData = JSON.parse(user);
+      const orderData = {
+        items: this.items,
+        totalAmount: this.getTotal(),
+        deliveryAddress: {
+          city: userData.city || 'Default City',
+          street: userData.street || 'Default Street',
+          house: userData.house || 1
+        }
+      };
+      await this.apiService.placeOrder(orderData);
       alert('Zamówienie zostało złożone!');
       this.items = [];
       this.saveCart();
@@ -156,15 +171,18 @@ export class Cart {
     }
   }
 
-  private calculatePrice(product: Product, size: string, additives: string[]): number {
+  private calculatePrice(product: Product, size: any, additives: any[]): number {
     let price = product.price;
     
     // Dodaj cenę za rozmiar
-    if (size === 'M') price += 0.50;
-    if (size === 'L') price += 1.00;
+    if (size && size.price) {
+      price += size.price;
+    }
     
     // Dodaj cenę za dodatki
-    price += additives.length * 0.50;
+    if (additives && additives.length > 0) {
+      price += additives.reduce((sum, additive) => sum + (additive.price || 0), 0);
+    }
     
     return price;
   }

@@ -15,8 +15,9 @@ export class Loader {
     return loader;
   }
 
-  show(container: HTMLElement): void {
-    container.appendChild(this.element);
+  show(container?: HTMLElement): void {
+    const target = container || document.body;
+    target.appendChild(this.element);
   }
 
   hide(): void {

@@ -2,6 +2,7 @@ import { ApiService } from '../services/ApiService';
 import { validateEmail, validatePassword } from '../utils/validators';
 import { Loader } from './Loader';
 import { ErrorMessage } from './ErrorMessage';
+import { PaymentMethod } from '../types/api';
 
 export class Auth {
   private apiService: ApiService;
@@ -128,9 +129,9 @@ export class Auth {
 
     this.loader.show();
     try {
-      const response = await this.apiService.login(email, password);
-      localStorage.setItem('user', JSON.stringify(response.data));
-      this.updateUserInterface(response.data.name);
+      const response = await this.apiService.login({ login: email, password });
+      localStorage.setItem('user', JSON.stringify(response));
+      this.updateUserInterface(response.login);
       this.closeModals();
     } catch (error) {
       this.errorMessage.show('Błąd logowania');
@@ -151,8 +152,17 @@ export class Auth {
 
     this.loader.show();
     try {
-      await this.apiService.register(name, email, password);
-      this.errorMessage.show('Rejestracja udana! Możesz się zalogować', 'success');
+      const registerData = {
+        login: name,
+        password,
+        confirmPassword: password,
+        city: 'Default City',
+        street: 'Default Street',
+        house: 1,
+        paymentMethod: PaymentMethod.CASH
+      };
+      await this.apiService.register(registerData);
+      this.errorMessage.show('Rejestracja udana! Możesz się zalogować');
       this.switchToLogin();
     } catch (error) {
       this.errorMessage.show('Błąd rejestracji');
@@ -188,7 +198,7 @@ export class Auth {
     const user = localStorage.getItem('user');
     if (user) {
       const userData = JSON.parse(user);
-      this.updateUserInterface(userData.name);
+      this.updateUserInterface(userData.login);
     }
   }
 }

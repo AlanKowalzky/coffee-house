@@ -1,8 +1,8 @@
 export class ErrorMessage {
-  private element: HTMLElement;
+  private element: HTMLElement | null = null;
 
-  constructor(message: string = 'Something went wrong. Please, refresh the page') {
-    this.element = this.createElement(message);
+  constructor() {
+    // Empty constructor
   }
 
   private createElement(message: string): HTMLElement {
@@ -17,19 +17,30 @@ export class ErrorMessage {
     return errorDiv;
   }
 
-  show(container: HTMLElement): void {
-    container.appendChild(this.element);
+  show(message: string, type: string = 'error'): void {
+    this.hide(); // Remove any existing error message
+    
+    this.element = this.createElement(message);
+    document.body.appendChild(this.element);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      this.hide();
+    }, 5000);
   }
 
   hide(): void {
-    if (this.element.parentNode) {
+    if (this.element && this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
+      this.element = null;
     }
   }
 
   static showInContainer(container: HTMLElement, message?: string): ErrorMessage {
-    const error = new ErrorMessage(message);
-    error.show(container);
+    const error = new ErrorMessage();
+    if (message) {
+      error.show(message);
+    }
     return error;
   }
 

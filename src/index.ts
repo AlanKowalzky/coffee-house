@@ -2,6 +2,7 @@ import { ApiService } from './services/ApiService';
 import { Auth } from './components/Auth';
 import { Cart } from './components/Cart';
 import { ProductModal } from './components/ProductModal';
+import { Product, ProductCategory } from './types/api';
 
 // Import styles
 import '../styles/style.css';
@@ -46,12 +47,22 @@ class App {
         const productName = productCard.querySelector('h4')?.textContent || '';
         const productPrice = parseFloat(productCard.querySelector('.price')?.textContent?.replace('$', '') || '0');
         
-        const product = {
+        const product: Product = {
           id: Date.now().toString(),
           name: productName,
           description: 'Opis produktu',
           price: productPrice,
-          category: 'coffee'
+          category: ProductCategory.COFFEE,
+          image: 'default.jpg',
+          sizes: [
+            { id: 'S', name: 'Small', price: 0 },
+            { id: 'M', name: 'Medium', price: 0.50 },
+            { id: 'L', name: 'Large', price: 1.00 }
+          ],
+          additives: [
+            { id: 'sugar', name: 'Sugar', price: 0 },
+            { id: 'milk', name: 'Milk', price: 0.50 }
+          ]
         };
         
         this.productModal.showModal(product);
