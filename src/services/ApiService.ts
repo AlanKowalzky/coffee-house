@@ -1,7 +1,7 @@
 import { Product, User, LoginCredentials, RegisterData, ApiResponse, OrderRequest, OrderResponse } from '../types/api.js';
 
 export class ApiService {
-  private readonly baseUrl = 'https://6kt29kkeub.execute-api.eu-central-1.amazonaws.com/api';
+  private readonly baseUrl = 'https://6kt29kkeub.execute-api.eu-central-1.amazonaws.com';
 
   async getFavoriteProducts(): Promise<Product[]> {
     try {
@@ -23,8 +23,27 @@ export class ApiService {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data: ApiResponse<Product[]> = await response.json();
-      return data.data || [];
+      const data = await response.json();
+      // Transform API data to match our Product interface
+      const products = data.data?.map((item: any) => ({
+        id: item.id.toString(),
+        name: item.name,
+        description: item.description,
+        price: parseFloat(item.price),
+        category: item.category,
+        image: `${item.category}-${item.id}.jpg`,
+        sizes: [
+          { id: 'S', name: 'Small', price: 0 },
+          { id: 'M', name: 'Medium', price: 0.50 },
+          { id: 'L', name: 'Large', price: 1.00 }
+        ],
+        additives: [
+          { id: 'sugar', name: 'Sugar', price: 0 },
+          { id: 'milk', name: 'Milk', price: 0.50 },
+          { id: 'syrup', name: 'Syrup', price: 0.50 }
+        ]
+      })) || [];
+      return products;
     } catch (error) {
       console.error('Error fetching products:', error);
       throw new Error('Failed to load products');

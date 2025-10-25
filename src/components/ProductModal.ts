@@ -21,8 +21,22 @@ export class ProductModal {
     const totalPrice = document.getElementById('total-price');
     
     if (modalImage) {
-      modalImage.src = `assets/${product.image}`;
+      console.log('Product:', product.name, 'Image:', product.image);
+      // Try direct path first
+      modalImage.src = `./assets/${product.image}`;
       modalImage.alt = product.name;
+      modalImage.style.display = 'block';
+      modalImage.onerror = () => {
+        console.log('Direct path failed, trying without ./');
+        modalImage.src = `assets/${product.image}`;
+        modalImage.onerror = () => {
+          console.log('Both paths failed, using fallback');
+          modalImage.src = './assets/coffee-1.jpg';
+        };
+      };
+      modalImage.onload = () => {
+        console.log('Image loaded:', modalImage.src);
+      };
     }
     if (modalName) modalName.textContent = product.name;
     if (modalDescription) modalDescription.textContent = product.description;
@@ -50,20 +64,18 @@ export class ProductModal {
     // Set initial price
     if (totalPrice) totalPrice.textContent = `$${product.price.toFixed(2)}`;
     
-    // Remove old event listeners
-    this.removeModalEvents();
-    
     // Show modal
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     
-    // Add new event listeners
+    // Bind events
     this.bindModalEvents(product);
   }
 
 
 
   private closeModal(): void {
+    console.log('Closing modal');
     const modal = document.getElementById('product-modal');
     if (modal) {
       modal.style.display = 'none';
@@ -71,64 +83,46 @@ export class ProductModal {
     }
   }
 
-  private removeModalEvents(): void {
-    const modal = document.getElementById('product-modal');
-    if (!modal) return;
-    
-    // Clone and replace modal to remove all event listeners
-    const newModal = modal.cloneNode(true);
-    modal.parentNode?.replaceChild(newModal, modal);
-  }
+
 
   private bindModalEvents(product: Product): void {
     const modal = document.getElementById('product-modal');
     if (!modal) return;
 
-    // Close modal events
-    const closeBtn = modal.querySelector('.modal-close');
-    const overlay = modal.querySelector('.modal-overlay');
+    // Remove old listeners by cloning
+    const newModal = modal.cloneNode(true) as HTMLElement;
+    modal.parentNode?.replaceChild(newModal, modal);
     
-    if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.closeModal();
-      });
-    }
-    
-    if (overlay) {
-      overlay.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.closeModal();
-      });
-    }
+    const freshModal = document.getElementById('product-modal');
+    if (!freshModal) return;
 
-    // Size selection
-    modal.querySelectorAll('[data-size]').forEach(btn => {
+    // Close button
+    const closeBtn = freshModal.querySelector('.modal-close');
+    closeBtn?.addEventListener('click', () => {
+      console.log('Close clicked');
+      this.closeModal();
+    });
+    
+    // Overlay
+    const overlay = freshModal.querySelector('.modal-overlay');
+    overlay?.addEventListener('click', () => this.closeModal());
+
+    // Size buttons
+    freshModal.querySelectorAll('[data-size]').forEach(btn => {
       btn.addEventListener('click', () => {
-        modal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+        freshModal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        this.updatePrice(product, modal);
+        this.updatePrice(product, freshModal);
       });
     });
 
-    // Additive selection
-    modal.querySelectorAll('[data-additive]').forEach(btn => {
+    // Additive buttons
+    freshModal.querySelectorAll('[data-additive]').forEach(btn => {
       btn.addEventListener('click', () => {
         btn.classList.toggle('active');
-        this.updatePrice(product, modal);
+        this.updatePrice(product, freshModal);
       });
     });
-
-    // Escape key to close
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        this.closeModal();
-        document.removeEventListener('keydown', handleEscape);
-      }
-    };
-    document.addEventListener('keydown', handleEscape);
   }
 
   private updatePrice(product: Product, modal: Element): void {
