@@ -56,11 +56,13 @@ class MenuApp {
   private async loadProducts(): Promise<void> {
     try {
       this.products = await this.apiService.getProducts();
+      console.log('API products loaded:', this.products.length);
       this.displayProducts();
     } catch (error) {
       console.error('Error loading products:', error);
       // Load mock products if API fails
       this.loadMockProducts();
+      console.log('Mock products loaded:', this.products.length);
       this.displayProducts();
     }
   }
@@ -182,8 +184,10 @@ class MenuApp {
       return;
     }
 
+    console.log('All products with categories:', this.products.map(p => ({name: p.name, category: p.category})));
     const filteredProducts = this.products.filter(product => product.category === this.currentCategory);
     console.log('Filtered products:', filteredProducts.length, 'for category:', this.currentCategory);
+    console.log('Filtered product names:', filteredProducts.map(p => p.name));
     const productsToShow = filteredProducts.slice(0, this.displayedCount);
     console.log('Products to show:', productsToShow.length, 'Display count:', this.displayedCount);
 
