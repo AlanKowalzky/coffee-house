@@ -1,6 +1,6 @@
-import { ApiService } from './services/ApiService.js';
-import { Loader } from './components/Loader.js';
-import { ErrorMessage } from './components/ErrorMessage.js';
+import { ApiService } from './services/ApiService';
+import { Loader } from './components/Loader';
+import { ErrorMessage } from './components/ErrorMessage';
 
 // Import existing styles
 import '../styles/style.css';
