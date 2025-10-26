@@ -1,17 +1,9 @@
-# Dependencies
 node_modules/
-
-# IDE
+dist/
+*.log
+.env
+.DS_Store
+coverage/
+.nyc_output/
 .vscode/
 .idea/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Build
-dist/
-build/
