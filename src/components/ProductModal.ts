@@ -198,7 +198,7 @@ export class ProductModal {
     // Show notification
     const notification = document.createElement('div');
     notification.className = 'cart-notification';
-    notification.textContent = 'Produkt dodany do koszyka!';
+    notification.textContent = 'Added to cart!';
     document.body.appendChild(notification);
     
     setTimeout(() => {

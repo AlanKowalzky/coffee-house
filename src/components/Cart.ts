@@ -77,10 +77,10 @@ export class Cart {
           <p class="cart-item-price">$${(item.totalPrice / item.quantity).toFixed(2)}</p>
         </div>
         <div class="cart-item-controls">
-          <button onclick="cart.updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
+          <button class="cart-decrease-btn" data-item-id="${item.id}" data-qty="${item.quantity}">-</button>
           <span>${item.quantity}</span>
-          <button onclick="cart.updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
-          <button onclick="cart.removeItem('${item.id}')" class="remove-btn">Remove</button>
+          <button class="cart-increase-btn" data-item-id="${item.id}" data-qty="${item.quantity}">+</button>
+          <button class="cart-remove-btn" data-item-id="${item.id}">Remove</button>
         </div>
       </div>
     `).join('');
@@ -136,6 +136,50 @@ export class Cart {
 
   private showCartModal(): void {
     document.body.insertAdjacentHTML('beforeend', this.renderCartModal());
+    this.bindCartModalEvents();
+  }
+
+  private bindCartModalEvents(): void {
+    const cartModal = document.getElementById('cartModal');
+    if (!cartModal) return;
+
+    cartModal.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      
+      if (target.classList.contains('cart-remove-btn')) {
+        const itemId = target.getAttribute('data-item-id');
+        if (itemId) {
+          this.removeItem(itemId);
+          this.refreshCartModal();
+        }
+      }
+      
+      if (target.classList.contains('cart-decrease-btn')) {
+        const itemId = target.getAttribute('data-item-id');
+        const currentQty = parseInt(target.getAttribute('data-qty') || '1');
+        if (itemId) {
+          this.updateQuantity(itemId, currentQty - 1);
+          this.refreshCartModal();
+        }
+      }
+      
+      if (target.classList.contains('cart-increase-btn')) {
+        const itemId = target.getAttribute('data-item-id');
+        const currentQty = parseInt(target.getAttribute('data-qty') || '1');
+        if (itemId) {
+          this.updateQuantity(itemId, currentQty + 1);
+          this.refreshCartModal();
+        }
+      }
+    });
+  }
+
+  private refreshCartModal(): void {
+    const cartModal = document.getElementById('cartModal');
+    if (cartModal) {
+      cartModal.remove();
+      this.showCartModal();
+    }
   }
 
   private closeCartModal(): void {
