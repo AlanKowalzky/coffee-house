@@ -1,4 +1,4 @@
-import { Product, User, LoginCredentials, RegisterData, ApiResponse, OrderRequest, OrderResponse, ProductCategory } from '../types/api.js';
+import { Product, User, LoginCredentials, RegisterData, ApiResponse, OrderRequest, OrderResponse, ProductCategory } from '../types/api';
 import { apiLog } from './DebugLog';
 
 export class ApiService {
