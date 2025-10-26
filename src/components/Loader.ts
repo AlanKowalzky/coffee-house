@@ -10,25 +10,23 @@ export class Loader {
     loader.className = 'loader';
     loader.innerHTML = `
       <div class="loader-spinner"></div>
-      <p class="loader-text">Loading...</p>
+      <p>Loading...</p>
     `;
     return loader;
   }
 
-  show(container?: HTMLElement): void {
-    const target = container || document.body;
-    target.appendChild(this.element);
+  public show(container: HTMLElement): void {
+    container.appendChild(this.element);
   }
 
-  hide(): void {
-    if (this.element.parentNode) {
-      this.element.parentNode.removeChild(this.element);
-    }
+  public hide(): void {
+    this.element.remove();
   }
 
-  static showInContainer(container: HTMLElement): Loader {
-    const loader = new Loader();
-    loader.show(container);
-    return loader;
+  public static showError(container: HTMLElement, message: string = 'Something went wrong. Please, refresh the page'): void {
+    const error = document.createElement('div');
+    error.className = 'error-message';
+    error.textContent = message;
+    container.appendChild(error);
   }
 }

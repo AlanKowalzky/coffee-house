@@ -117,48 +117,42 @@ export class ProductModal {
 
     console.log('Binding modal events...');
 
-    // Use single event listener with event delegation
-    const handleModalClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      
-      // Close modal
-      if (target.classList.contains('modal-close') || target.classList.contains('modal-overlay')) {
-        this.closeModal();
-        modal.removeEventListener('click', handleModalClick);
-        return;
-      }
-      
-      // Add to cart
-      if (target.id === 'add-to-cart') {
-        this.addToCart(product, modal);
-        this.closeModal();
-        modal.removeEventListener('click', handleModalClick);
-        return;
-      }
-      
-      // Size selection
-      if (target.hasAttribute('data-size') || target.parentElement?.hasAttribute('data-size')) {
-        const sizeBtn = target.hasAttribute('data-size') ? target : target.parentElement;
-        if (sizeBtn) {
-          console.log('Size button clicked:', sizeBtn.getAttribute('data-size'));
-          modal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
-          sizeBtn.classList.add('active');
-          this.updatePrice(product, modal);
-        }
-      }
-      
-      // Additive selection
-      if (target.hasAttribute('data-additive') || target.parentElement?.hasAttribute('data-additive')) {
-        const additiveBtn = target.hasAttribute('data-additive') ? target : target.parentElement;
-        if (additiveBtn) {
-          console.log('Additive button clicked:', additiveBtn.getAttribute('data-additive'));
-          additiveBtn.classList.toggle('active');
-          this.updatePrice(product, modal);
-        }
-      }
-    };
+    // Close events
+    const closeBtn = modal.querySelector('.modal-close');
+    const overlay = modal.querySelector('.modal-overlay');
+    
+    closeBtn?.addEventListener('click', () => this.closeModal());
+    overlay?.addEventListener('click', () => this.closeModal());
 
-    modal.addEventListener('click', handleModalClick);
+    // Add to cart button
+    const addToCartBtn = modal.querySelector('#add-to-cart');
+    addToCartBtn?.addEventListener('click', () => {
+      this.addToCart(product, modal);
+      this.closeModal();
+    });
+
+    // Size selection
+    const sizeButtons = modal.querySelectorAll('[data-size]');
+    console.log('Found size buttons:', sizeButtons.length);
+    sizeButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        console.log('Size button clicked:', btn.getAttribute('data-size'));
+        modal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        this.updatePrice(product, modal);
+      });
+    });
+
+    // Additive selection
+    const additiveButtons = modal.querySelectorAll('[data-additive]');
+    console.log('Found additive buttons:', additiveButtons.length);
+    additiveButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        console.log('Additive button clicked:', btn.getAttribute('data-additive'));
+        btn.classList.toggle('active');
+        this.updatePrice(product, modal);
+      });
+    });
   }
 
   private updatePrice(product: Product, modal: Element): void {

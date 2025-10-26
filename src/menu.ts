@@ -4,6 +4,8 @@ import { Cart } from './components/Cart';
 import { ProductModal } from './components/ProductModal';
 import { Menu } from './components/Menu';
 import { BurgerMenu } from './components/BurgerMenu';
+import { Loader } from './components/Loader';
+import { ErrorMessage } from './components/ErrorMessage';
 import { Product, ProductCategory } from './types/api';
 
 // Import styles
@@ -54,12 +56,21 @@ class MenuApp {
   }
 
   private async loadProducts(): Promise<void> {
+    const menuGrid = document.getElementById('menu-grid');
+    if (!menuGrid) return;
+
+    const loader = new Loader();
+    loader.show(menuGrid);
+
     try {
       this.products = await this.apiService.getProducts();
       console.log('API products loaded:', this.products.length);
+      loader.hide();
       this.displayProducts();
     } catch (error) {
       console.error('Error loading products:', error);
+      loader.hide();
+      ErrorMessage.getInstance().show('Something went wrong. Please, refresh the page');
       // Load mock products if API fails
       this.loadMockProducts();
       console.log('Mock products loaded:', this.products.length);

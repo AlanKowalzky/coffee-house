@@ -3,22 +3,52 @@ import { Product, User, LoginCredentials, RegisterData, ApiResponse, OrderReques
 export class ApiService {
   private readonly baseUrl = 'https://6kt29kkeub.execute-api.eu-central-1.amazonaws.com';
 
-  async getFavoriteProducts(): Promise<Product[]> {
+
+
+  async getProducts(): Promise<Product[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/products/favorites`);
+      const response = await fetch(`${this.baseUrl}/products`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const data: ApiResponse<Product[]> = await response.json();
-      return data.data || [];
+      const data = await response.json();
+      
+      // Transform API data to match our Product interface
+      const products = data.data?.map((item: any) => ({
+        id: item.id.toString(),
+        name: item.name,
+        description: item.description,
+        price: parseFloat(item.price),
+        discountedPrice: item.discountPrice ? parseFloat(item.discountPrice) : undefined,
+        category: item.category,
+        image: this.getImagePath(item.category, item.id),
+        sizes: [
+          { id: 'S', name: 'Small', price: 0 },
+          { id: 'M', name: 'Medium', price: 0.50 },
+          { id: 'L', name: 'Large', price: 1.00 }
+        ],
+        additives: [
+          { id: 'sugar', name: 'Sugar', price: 0 },
+          { id: 'milk', name: 'Milk', price: 0.50 },
+          { id: 'syrup', name: 'Syrup', price: 0.50 }
+        ]
+      })) || [];
+      
+      return products;
     } catch (error) {
-      console.error('Error fetching favorite products:', error);
-      throw new Error('Failed to load favorite products');
+      console.error('Error fetching products:', error);
+      // Return mock data as fallback
+      return this.getMockProducts();
     }
   }
 
-  async getProducts(): Promise<Product[]> {
-    // Add more coffee products
+  private getImagePath(category: string, id: number): string {
+    if (category === 'coffee') return `coffee-${Math.min(id, 8)}.jpg`;
+    if (category === 'tea') return `tea-${Math.min(id - 8, 4)}.png`;
+    return `dessert-${Math.min(id - 16, 8)}.png`;
+  }
+
+  private getMockProducts(): Product[] {
     return [
       {
         id: '1',
@@ -125,6 +155,42 @@ export class ApiService {
         ]
       }
     ];
+  }
+
+  async getFavoriteProducts(): Promise<Product[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/products`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      
+      // Get first 3 coffee products as favorites
+      const coffeeProducts = data.data?.filter((item: any) => item.category === 'coffee').slice(0, 3) || [];
+      
+      return coffeeProducts.map((item: any) => ({
+        id: item.id.toString(),
+        name: item.name,
+        description: item.description,
+        price: parseFloat(item.price),
+        discountedPrice: item.discountPrice ? parseFloat(item.discountPrice) : undefined,
+        category: item.category,
+        image: this.getImagePath(item.category, item.id),
+        sizes: [
+          { id: 'S', name: 'Small', price: 0 },
+          { id: 'M', name: 'Medium', price: 0.50 },
+          { id: 'L', name: 'Large', price: 1.00 }
+        ],
+        additives: [
+          { id: 'sugar', name: 'Sugar', price: 0 },
+          { id: 'milk', name: 'Milk', price: 0.50 },
+          { id: 'syrup', name: 'Syrup', price: 0.50 }
+        ]
+      }));
+    } catch (error) {
+      console.error('Error fetching favorite products:', error);
+      throw new Error('Failed to load favorite products');
+    }
   }
 
   async getProductById(id: string): Promise<Product> {
