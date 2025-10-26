@@ -96,8 +96,9 @@ class App {
             apiLog('ApiService.getFavoriteProducts - success', products);
             // keep UI update minimal for now; consumers can inspect console logs
           })
-          .catch(err => {
-            apiLog('ApiService.getFavoriteProducts - error', err, (err as any)?.message || JSON.stringify(err));
+          .catch((err: unknown) => {
+            const msg = ((err as { message?: string })?.message) || JSON.stringify(err);
+            apiLog('ApiService.getFavoriteProducts - error', err, msg);
           });
       }
     });
@@ -109,9 +110,9 @@ class App {
 }
 
 // Initialize the application (guard to avoid multiple instances)
-if (!(window as any).__coffeeHouseAppInitialized) {
+if (!(window as unknown as Window).__coffeeHouseAppInitialized) {
   const app = new App();
   // Expose cart globally for modal interactions
-  (window as any).cart = app.getCart();
-  (window as any).__coffeeHouseAppInitialized = true;
+  (window as unknown as Window).cart = app.getCart();
+  (window as unknown as Window).__coffeeHouseAppInitialized = true;
 }

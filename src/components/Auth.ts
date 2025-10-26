@@ -220,7 +220,7 @@ export class Auth {
     }, true);
 
     // react to input events so button state updates live (not only on blur)
-    document.addEventListener('input', (e) => {
+    document.addEventListener('input', () => {
       this.updateSubmitButtons();
     });
   }
@@ -258,10 +258,10 @@ export class Auth {
     const passwordVal = passwordInput?.value ?? '';
 
     // clear previous validation
-    const loginErr = document.getElementById('loginLoginError');
-    const pwErr = document.getElementById('loginPasswordError');
-    if (loginErr) loginErr.textContent = '';
-    if (pwErr) pwErr.textContent = '';
+  const pwErr = document.getElementById('loginPasswordError');
+  // clear previous validation
+  const maybeLoginErr = document.getElementById('loginLoginError'); if (maybeLoginErr) maybeLoginErr.textContent = '';
+  if (pwErr) pwErr.textContent = '';
     if (loginInput) loginInput.classList.remove('invalid');
     if (passwordInput) passwordInput.classList.remove('invalid');
 
@@ -269,17 +269,17 @@ export class Auth {
     const pwValidation = Validators.validatePassword(passwordVal);
 
     if (!loginValidation.isValid || !pwValidation.isValid) {
-      if (!loginValidation.isValid && loginErr) {
-        loginErr.textContent = loginValidation.message || 'Invalid login';
-        (loginErr as HTMLElement).style.color = 'red';
+      if (!loginValidation.isValid && maybeLoginErr) {
+        maybeLoginErr.textContent = loginValidation.message || 'Invalid login';
+        (maybeLoginErr as HTMLElement).style.color = 'red';
         if (loginInput) loginInput.classList.add('invalid');
-        if (loginInput) (loginInput.style as any).borderColor = 'red';
+    if (loginInput) loginInput.style.borderColor = 'red';
       }
       if (!pwValidation.isValid && pwErr) {
         pwErr.textContent = pwValidation.message || 'Invalid password';
         (pwErr as HTMLElement).style.color = 'red';
         if (passwordInput) passwordInput.classList.add('invalid');
-        if (passwordInput) (passwordInput.style as any).borderColor = 'red';
+  if (passwordInput) passwordInput.style.borderColor = 'red';
       }
       return;
     }
@@ -291,7 +291,7 @@ export class Auth {
       localStorage.setItem('user', JSON.stringify(response));
       this.updateUserInterface(response.login);
       this.closeModals();
-    } catch (error: any) {
+  } catch (error) {
       // Map server error to form fields or show global message
       this.mapServerErrorToFields(error, ['loginLogin','loginPassword']);
     } finally {
@@ -319,41 +319,41 @@ export class Auth {
     // clear previous validation
     const errIds = ['registerLoginError','registerEmailError','registerPasswordError','registerConfirmError','registerCityError','registerStreetError','registerHouseError'];
     errIds.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
-    [loginInput, emailInput, passwordInput, confirmInput, houseInput].forEach(inp => { if (inp) inp.classList.remove('invalid'); if (inp) (inp.style as any).borderColor = ''; });
+  [loginInput, emailInput, passwordInput, confirmInput, houseInput].forEach(inp => { if (inp) inp.classList.remove('invalid'); if (inp) inp.style.borderColor = ''; });
 
     let hasError = false;
 
     const loginValidation = Validators.validateLogin(loginVal);
     if (!loginValidation.isValid) {
       const el = document.getElementById('registerLoginError'); if (el) { el.textContent = loginValidation.message || 'Invalid login'; (el as HTMLElement).style.color = 'red'; }
-      if (loginInput) { loginInput.classList.add('invalid'); (loginInput.style as any).borderColor = 'red'; }
+  if (loginInput) { loginInput.classList.add('invalid'); loginInput.style.borderColor = 'red'; }
       hasError = true;
     }
 
     if (!validateEmail(emailVal)) {
       const el = document.getElementById('registerEmailError'); if (el) { el.textContent = 'Invalid email'; (el as HTMLElement).style.color = 'red'; }
-      if (emailInput) { emailInput.classList.add('invalid'); (emailInput.style as any).borderColor = 'red'; }
+  if (emailInput) { emailInput.classList.add('invalid'); emailInput.style.borderColor = 'red'; }
       hasError = true;
     }
 
     const passValidation = Validators.validatePassword(passwordVal);
     if (!passValidation.isValid) {
       const el = document.getElementById('registerPasswordError'); if (el) { el.textContent = passValidation.message || 'Invalid password'; (el as HTMLElement).style.color = 'red'; }
-      if (passwordInput) { passwordInput.classList.add('invalid'); (passwordInput.style as any).borderColor = 'red'; }
+  if (passwordInput) { passwordInput.classList.add('invalid'); passwordInput.style.borderColor = 'red'; }
       hasError = true;
     }
 
     const matchValidation = Validators.validatePasswordMatch(passwordVal, confirmVal);
     if (!matchValidation.isValid) {
       const el = document.getElementById('registerConfirmError'); if (el) { el.textContent = matchValidation.message || 'Passwords do not match'; (el as HTMLElement).style.color = 'red'; }
-      if (confirmInput) { confirmInput.classList.add('invalid'); (confirmInput.style as any).borderColor = 'red'; }
+  if (confirmInput) { confirmInput.classList.add('invalid'); confirmInput.style.borderColor = 'red'; }
       hasError = true;
     }
 
     const houseValidation = Validators.validateHouseNumber(houseVal);
     if (!houseValidation.isValid) {
       const el = document.getElementById('registerHouseError'); if (el) { el.textContent = houseValidation.message || 'Invalid house number'; (el as HTMLElement).style.color = 'red'; }
-      if (houseInput) { houseInput.classList.add('invalid'); (houseInput.style as any).borderColor = 'red'; }
+  if (houseInput) { houseInput.classList.add('invalid'); houseInput.style.borderColor = 'red'; }
       hasError = true;
     }
 
@@ -388,12 +388,12 @@ export class Auth {
         localStorage.setItem('user', JSON.stringify(resp));
         this.updateUserInterface(resp.login);
         this.closeModals();
-      } catch (loginErr: any) {
+    } catch {
         // If auto-login fails, show success message and ask to login
         this.errorMessage.display('Registration successful! Please login.');
         this.switchToLogin();
       }
-    } catch (error: any) {
+  } catch (error) {
       // Map server error to specific fields when possible
       this.mapServerErrorToFields(error, ['registerLogin','registerEmail','registerPassword','registerConfirm','registerCity','registerStreet','registerHouse']);
     } finally {
@@ -402,7 +402,7 @@ export class Auth {
   }
 
   // Try to map a server error to form field error elements. If mapping not possible, show a global error.
-  private mapServerErrorToFields(error: any, candidateFieldIds: string[]): void {
+  private mapServerErrorToFields(error: unknown, candidateFieldIds: string[]): void {
     // normalize error
     try {
       // common structured formats
@@ -412,41 +412,44 @@ export class Auth {
       }
 
       // If error contains an `errors` object: { errors: { field: 'msg' } }
-      if (error.errors && typeof error.errors === 'object') {
+      const errObj = error as Record<string, unknown>;
+      if (errObj.errors && typeof errObj.errors === 'object') {
         let firstSet = false;
-        for (const key of Object.keys(error.errors)) {
+        for (const key of Object.keys(errObj.errors as Record<string, unknown>)) {
           const id = `${key}Error`;
           const el = document.getElementById(id);
+          const val = (errObj.errors as Record<string, unknown>)[key];
           if (el) {
-            el.textContent = error.errors[key] || String(error.errors[key]);
+            el.textContent = (val as string) || String(val);
             (el as HTMLElement).style.color = 'red';
             // try to mark input
             const input = document.getElementById(key) as HTMLElement | null;
-            if (input) { input.classList.add('invalid'); (input as HTMLElement).style.borderColor = 'red'; if (!firstSet) { (input as HTMLElement).focus?.(); firstSet = true; } }
+            if (input) { input.classList.add('invalid'); input.style.borderColor = 'red'; if (!firstSet) { (input as HTMLElement).focus?.(); firstSet = true; } }
           }
         }
-        if (!firstSet) this.errorMessage.display(error.message || 'Operation failed');
+        if (!firstSet) this.errorMessage.display(String((errObj as Record<string, unknown>)['message'] ?? 'Operation failed'));
         return;
       }
 
       // If error has field/message structure
-      if (error.field && error.message) {
-        const id = `${error.field}Error`;
+  const maybeField = (errObj as Record<string, unknown>)?.['field'] as string | undefined;
+  const maybeMessage = (errObj as Record<string, unknown>)?.['message'] as string | undefined;
+      if (maybeField && maybeMessage) {
+        const id = `${maybeField}Error`;
         const el = document.getElementById(id);
         if (el) {
-          el.textContent = error.message;
+          el.textContent = maybeMessage;
           (el as HTMLElement).style.color = 'red';
-          const input = document.getElementById(error.field) as HTMLElement | null;
-          if (input) { input.classList.add('invalid'); (input as HTMLElement).style.borderColor = 'red'; input.focus?.(); }
+          const input = document.getElementById(maybeField) as HTMLElement | null;
+          if (input) { input.classList.add('invalid'); input.style.borderColor = 'red'; input.focus?.(); }
           return;
         }
       }
 
       // If error.message contains keywords, map heuristically
-      const msg = String(error.message || error || '');
+  const msg = String((errObj as Record<string, unknown>)?.['message'] ?? errObj ?? '');
       const lowered = msg.toLowerCase();
       for (const fid of candidateFieldIds) {
-        const fieldName = fid.replace(/(register|login)/, '').replace(/^[A-Z]/, (m) => m.toLowerCase());
         // simple heuristics: check if message mentions login/email/password/house/city/street
         if (lowered.includes('login') && (fid.toLowerCase().includes('login') || fid.toLowerCase().includes('email'))) {
           const el = document.getElementById(`${fid}Error`);
@@ -464,7 +467,7 @@ export class Auth {
 
       // fallback: global message
       this.errorMessage.display(msg || 'Operation failed');
-    } catch (e) {
+    } catch {
       this.errorMessage.display('Operation failed');
     }
   }

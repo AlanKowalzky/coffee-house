@@ -1,6 +1,7 @@
 import { CartItem, Product } from '../types/api';
 import { ApiService } from '../services/ApiService';
 import { apiLog } from '../services/DebugLog';
+import { showToast } from './Toast';
 
 export class Cart {
   private items: CartItem[] = [];
@@ -207,35 +208,87 @@ export class Cart {
         }
       };
   apiLog('Cart.checkout - orderData', orderData);
-  const resp = await this.apiService.placeOrder(orderData);
+      // show loader overlay
+      this.showLoader();
+
+      // attempt to place order (ApiService has internal retry for 5xx)
+      const resp = await this.apiService.placeOrder(orderData);
   apiLog('Cart.checkout - placeOrder response', resp);
       apiLog('Cart.checkout - success', resp);
       console.log('Order placed successfully!', resp);
+      // save to local order history
+      this.saveOrderHistory(resp);
+      showToast('Order placed successfully!', 'success');
       this.items = [];
       this.saveCart();
       this.updateCartDisplay();
       this.closeCartModal();
+      this.hideLoader();
     } catch (error) {
-      const e: any = error;
-      apiLog('Cart.checkout - error', error, (e as any)?.message || JSON.stringify(e));
-      const err: any = error;
-      console.error('Error placing order:', err?.message || 'Unknown error');
+      const e = error as unknown;
+      let message = 'Unknown error';
+      try {
+        const maybeErr = e as { message?: string };
+        message = maybeErr?.message || JSON.stringify(e);
+      } catch {
+        // keep fallback message
+      }
+      apiLog('Cart.checkout - error', error, message);
+      console.error('Error placing order:', message);
+      showToast(`Error placing order: ${message}`, 'error');
+      this.hideLoader();
     }
   }
 
-  private calculatePrice(product: Product, size: any, additives: any[]): number {
+  // Loader overlay helpers
+  private showLoader(): void {
+    if (document.getElementById('cart-loader')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'cart-loader';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.3)';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.zIndex = '100000';
+    overlay.innerHTML = `<div style="background:#fff;padding:20px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.12);">Processing order...</div>`;
+    document.body.appendChild(overlay);
+  }
+
+  private hideLoader(): void {
+    document.getElementById('cart-loader')?.remove();
+  }
+
+  private saveOrderHistory(resp: unknown): void {
+    try {
+      const key = 'orderHistory';
+      const existing = localStorage.getItem(key);
+      const arr = existing ? JSON.parse(existing) : [];
+      const respAny = resp as Record<string, unknown> | null;
+      arr.unshift({ id: respAny?.['orderId'] || Date.now(), timestamp: new Date().toISOString(), response: resp });
+      localStorage.setItem(key, JSON.stringify(arr.slice(0, 20)));
+    } catch {
+      console.warn('Failed to save order history');
+    }
+  }
+
+  private calculatePrice(product: Product, size: { price?: number } | null, additives: Array<{ price?: number }> = []): number {
     let price = product.price;
-    
-    // Dodaj cenę za rozmiar
-    if (size && size.price) {
+
+    // Add size price
+    if (size && typeof size.price === 'number') {
       price += size.price;
     }
-    
-    // Dodaj cenę za dodatki
+
+    // Add additives price
     if (additives && additives.length > 0) {
-      price += additives.reduce((sum, additive) => sum + (additive.price || 0), 0);
+      price += additives.reduce((sum, additive) => sum + (typeof additive.price === 'number' ? additive.price : 0), 0);
     }
-    
+
     return price;
   }
 

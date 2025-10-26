@@ -24,15 +24,15 @@ export class ProductModal {
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
     // add Esc key listener to close modal
-    this.escListener = (e: KeyboardEvent) => {
+    this.escListener = (e: KeyboardEvent): void => {
       if (e.key === 'Escape' || e.key === 'Esc') {
         this.closeModal();
       }
     };
     document.addEventListener('keydown', this.escListener);
     
-    // Update modal content after showing
-    setTimeout(() => {
+  // Update modal content after showing
+  setTimeout((): void => {
       console.log('Updating modal content...');
       const modalImage = document.getElementById('modal-product-image') as HTMLImageElement;
       const modalName = document.getElementById('modal-product-name');
@@ -58,12 +58,12 @@ export class ProductModal {
         modalImage.alt = product.name;
         console.log('Current modalImage src after:', modalImage.src);
         
-        modalImage.onload = () => {
+        modalImage.onload = (): void => {
           console.log('Image loaded successfully:', imagePath);
           console.log('Image dimensions:', modalImage.naturalWidth, 'x', modalImage.naturalHeight);
         };
-        modalImage.onerror = (e) => {
-          console.log('Image failed to load:', imagePath, e);
+  modalImage.onerror = (): void => {
+          console.log('Image failed to load:', imagePath);
           console.log('Trying fallback image...');
           modalImage.src = 'assets/coffee-1.jpg';
         };
@@ -82,7 +82,7 @@ export class ProductModal {
       
       // Render size options
       if (sizeOptions) {
-        sizeOptions.innerHTML = product.sizes.map((size, index) => `
+  sizeOptions.innerHTML = product.sizes.map((size, index): string => `
           <button class="option-btn ${index === 0 ? 'active' : ''}" data-size="${size.id}" data-price="${size.price}">
             <span class="option-icon">${size.id}</span>
             <span class="option-text">${size.name}</span>
@@ -92,7 +92,7 @@ export class ProductModal {
       
       // Render additive options
       if (additivesOptions) {
-        additivesOptions.innerHTML = product.additives.map((additive, index) => `
+  additivesOptions.innerHTML = product.additives.map((additive, index): string => `
           <button class="option-btn" data-additive="${additive.id}" data-price="${additive.price}">
             <span class="option-icon">${index + 1}</span>
             <span class="option-text">${additive.name}</span>
@@ -140,13 +140,13 @@ export class ProductModal {
     // Close events - use onclick to overwrite previous handlers and avoid duplicates
     const closeBtn = modal.querySelector('.modal-close') as HTMLElement | null;
     const overlay = modal.querySelector('.modal-overlay') as HTMLElement | null;
-    if (closeBtn) closeBtn.onclick = () => this.closeModal();
-    if (overlay) overlay.onclick = () => this.closeModal();
+  if (closeBtn) closeBtn.onclick = (): void => this.closeModal();
+  if (overlay) overlay.onclick = (): void => this.closeModal();
 
     // Add to cart button - assign onclick to avoid multiple listeners stacking
     const addToCartBtn = modal.querySelector('#add-to-cart') as HTMLElement | null;
     if (addToCartBtn) {
-      addToCartBtn.onclick = () => {
+      addToCartBtn.onclick = (): void => {
         if (this.isAdding) return;
         this.isAdding = true;
         // disable button to avoid multiple clicks
@@ -156,7 +156,7 @@ export class ProductModal {
           this.closeModal();
         } finally {
           // reset guard shortly after to allow future adds
-          setTimeout(() => {
+          setTimeout((): void => {
             this.isAdding = false;
             (addToCartBtn as HTMLButtonElement).disabled = false;
           }, 300);
@@ -167,12 +167,12 @@ export class ProductModal {
     // Size selection
     const sizeButtons = modal.querySelectorAll('[data-size]');
     console.log('Found size buttons:', sizeButtons.length);
-    sizeButtons.forEach(btn => {
+  sizeButtons.forEach((btn): void => {
       // tooltip handlers for size
-      btn.addEventListener('mouseenter', (ev) => this.showPriceTooltip(ev, btn as HTMLElement));
-      btn.addEventListener('mouseleave', () => this.hidePriceTooltip());
+    btn.addEventListener('mouseenter', (ev: Event): void => { this.showPriceTooltip(ev, btn as HTMLElement); });
+    btn.addEventListener('mouseleave', (): void => { this.hidePriceTooltip(); });
 
-      btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', (): void => {
         console.log('Size button clicked:', btn.getAttribute('data-size'));
         modal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -183,12 +183,12 @@ export class ProductModal {
     // Additive selection
     const additiveButtons = modal.querySelectorAll('[data-additive]');
     console.log('Found additive buttons:', additiveButtons.length);
-    additiveButtons.forEach(btn => {
+  additiveButtons.forEach((btn): void => {
       // tooltip handlers for additives
-      btn.addEventListener('mouseenter', (ev) => this.showPriceTooltip(ev, btn as HTMLElement));
-      btn.addEventListener('mouseleave', () => this.hidePriceTooltip());
+    btn.addEventListener('mouseenter', (ev: Event): void => { this.showPriceTooltip(ev, btn as HTMLElement); });
+    btn.addEventListener('mouseleave', (): void => { this.hidePriceTooltip(); });
 
-      btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', (): void => {
         console.log('Additive button clicked:', btn.getAttribute('data-additive'));
         btn.classList.toggle('active');
         this.updatePrice(product, modal);
@@ -199,8 +199,8 @@ export class ProductModal {
   private showPriceTooltip(ev: Event, target: HTMLElement): void {
     const priceAttr = target.getAttribute('data-price');
     if (!priceAttr) return;
-    const price = parseFloat(priceAttr);
-    const text = isNaN(price) ? priceAttr : `${price.toFixed(2)} zł`;
+  const price = parseFloat(priceAttr);
+  const text = isNaN(price) ? priceAttr : `$${price.toFixed(2)}`;
 
     // remove existing tooltip
     if (this.tooltipElement) {

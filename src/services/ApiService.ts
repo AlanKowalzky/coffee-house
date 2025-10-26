@@ -1,4 +1,4 @@
-import { Product, User, LoginCredentials, RegisterData, ApiResponse, OrderRequest, OrderResponse } from '../types/api.js';
+import { Product, User, LoginCredentials, RegisterData, ApiResponse, OrderRequest, OrderResponse, ProductCategory } from '../types/api.js';
 import { apiLog } from './DebugLog';
 
 export class ApiService {
@@ -19,25 +19,28 @@ export class ApiService {
   apiLog('ApiService.getProducts - response body', data);
       
       // Transform API data to match our Product interface
-      const products = data.data?.map((item: any) => ({
-        id: item.id.toString(),
-        name: item.name,
-        description: item.description,
-        price: parseFloat(item.price),
-        discountedPrice: item.discountPrice ? parseFloat(item.discountPrice) : undefined,
-        category: item.category,
-        image: this.getImagePath(item.category, item.id),
-        sizes: [
-          { id: 'S', name: 'Small', price: 0 },
-          { id: 'M', name: 'Medium', price: 0.50 },
-          { id: 'L', name: 'Large', price: 1.00 }
-        ],
-        additives: [
-          { id: 'sugar', name: 'Sugar', price: 0 },
-          { id: 'milk', name: 'Milk', price: 0.50 },
-          { id: 'syrup', name: 'Syrup', price: 0.50 }
-        ]
-      })) || [];
+      const products = (data.data || []).map((item: unknown) => {
+        const it = item as Record<string, unknown>;
+        return {
+          id: String(it.id),
+          name: String(it.name),
+          description: String(it.description),
+          price: parseFloat(String(it.price)),
+          discountedPrice: it.discountPrice ? parseFloat(String(it.discountPrice)) : undefined,
+          category: String(it.category),
+          image: this.getImagePath(String(it.category), Number(it.id)),
+          sizes: [
+            { id: 'S', name: 'Small', price: 0 },
+            { id: 'M', name: 'Medium', price: 0.50 },
+            { id: 'L', name: 'Large', price: 1.00 }
+          ],
+          additives: [
+            { id: 'sugar', name: 'Sugar', price: 0 },
+            { id: 'milk', name: 'Milk', price: 0.50 },
+            { id: 'syrup', name: 'Syrup', price: 0.50 }
+          ]
+        } as Product;
+      }) || [];
       
       return products;
     } catch (error) {
@@ -59,8 +62,8 @@ export class ApiService {
         id: '1',
         name: 'Irish coffee',
         description: 'Fragrant black coffee with Jameson Irish whiskey and whipped milk',
-        price: 7.00,
-        category: 'coffee' as any,
+  price: 7.00,
+  category: ProductCategory.COFFEE,
         image: 'coffee-1.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
@@ -77,8 +80,8 @@ export class ApiService {
         id: '2',
         name: 'Kahlua coffee',
         description: 'Classic coffee with milk and Kahlua liqueur under a cap of frothed milk',
-        price: 7.00,
-        category: 'coffee' as any,
+  price: 7.00,
+  category: ProductCategory.COFFEE,
         image: 'coffee-2.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
@@ -95,8 +98,8 @@ export class ApiService {
         id: '3',
         name: 'Honey cappuccino',
         description: 'Espresso with frothed milk and natural honey',
-        price: 5.50,
-        category: 'coffee' as any,
+  price: 5.50,
+  category: ProductCategory.COFFEE,
         image: 'coffee-3.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
@@ -113,8 +116,8 @@ export class ApiService {
         id: '4',
         name: 'Espresso',
         description: 'Classic black coffee made from freshly ground beans',
-        price: 4.50,
-        category: 'coffee' as any,
+  price: 4.50,
+  category: ProductCategory.COFFEE,
         image: 'coffee-4.jpg',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
@@ -131,8 +134,8 @@ export class ApiService {
         id: '5',
         name: 'Green Tea',
         description: 'Fresh green tea with natural antioxidants',
-        price: 3.50,
-        category: 'tea' as any,
+  price: 3.50,
+  category: ProductCategory.TEA,
         image: 'tea-1.png',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
@@ -148,8 +151,8 @@ export class ApiService {
         id: '6',
         name: 'Chocolate Cake',
         description: 'Rich chocolate cake with cream frosting',
-        price: 4.50,
-        category: 'dessert' as any,
+  price: 4.50,
+  category: ProductCategory.DESSERT,
         image: 'dessert-1.png',
         sizes: [
           { id: 'S', name: 'Small', price: 0 },
@@ -175,27 +178,33 @@ export class ApiService {
   apiLog('ApiService.getFavoriteProducts - response body', data);
       
       // Get first 3 coffee products as favorites
-      const coffeeProducts = data.data?.filter((item: any) => item.category === 'coffee').slice(0, 3) || [];
-      
-      return coffeeProducts.map((item: any) => ({
-        id: item.id.toString(),
-        name: item.name,
-        description: item.description,
-        price: parseFloat(item.price),
-        discountedPrice: item.discountPrice ? parseFloat(item.discountPrice) : undefined,
-        category: item.category,
-        image: this.getImagePath(item.category, item.id),
-        sizes: [
-          { id: 'S', name: 'Small', price: 0 },
-          { id: 'M', name: 'Medium', price: 0.50 },
-          { id: 'L', name: 'Large', price: 1.00 }
-        ],
-        additives: [
-          { id: 'sugar', name: 'Sugar', price: 0 },
-          { id: 'milk', name: 'Milk', price: 0.50 },
-          { id: 'syrup', name: 'Syrup', price: 0.50 }
-        ]
-      }));
+      const coffeeProducts = ((data.data || []) as unknown[]).filter((item) => {
+        const it = item as Record<string, unknown>;
+        return String(it.category) === 'coffee';
+      }).slice(0, 3) || [];
+
+      return coffeeProducts.map((item) => {
+        const it = item as Record<string, unknown>;
+        return {
+          id: String(it.id),
+          name: String(it.name),
+          description: String(it.description),
+          price: parseFloat(String(it.price)),
+          discountedPrice: it.discountPrice ? parseFloat(String(it.discountPrice)) : undefined,
+          category: String(it.category),
+          image: this.getImagePath(String(it.category), Number(it.id)),
+          sizes: [
+            { id: 'S', name: 'Small', price: 0 },
+            { id: 'M', name: 'Medium', price: 0.50 },
+            { id: 'L', name: 'Large', price: 1.00 }
+          ],
+          additives: [
+            { id: 'sugar', name: 'Sugar', price: 0 },
+            { id: 'milk', name: 'Milk', price: 0.50 },
+            { id: 'syrup', name: 'Syrup', price: 0.50 }
+          ]
+        } as Product;
+      });
     } catch (error) {
       console.error('Error fetching favorite products:', error);
       throw new Error('Failed to load favorite products');
@@ -237,12 +246,12 @@ export class ApiService {
       });
   apiLog('ApiService.login - response status', response.status);
       const text = await response.text();
-      let parsed: any = null;
-      try { parsed = JSON.parse(text); } catch (e) { parsed = text; }
+  let parsed: unknown = null;
+  try { parsed = JSON.parse(text); } catch { parsed = text; }
   apiLog('ApiService.login - response body', parsed);
       if (!response.ok) {
         let errMsg = 'Incorrect login or password';
-        try { if (parsed && (parsed.message || parsed.error)) errMsg = parsed.message || parsed.error; } catch(e) {}
+  try { const p = parsed as Record<string, unknown> | null; if (p && (p.message || p.error)) errMsg = String(p.message ?? p.error); } catch { /* ignore parse helpers */ }
         throw new Error(errMsg);
       }
       const data: ApiResponse<User> = typeof parsed === 'object' ? parsed : await response.json();
@@ -270,12 +279,13 @@ export class ApiService {
       });
   apiLog('ApiService.register - response status', response.status);
       const text = await response.text();
-      let parsed: any = null;
-      try { parsed = JSON.parse(text); } catch (e) { parsed = text; }
+  let parsed: unknown = null;
+  try { parsed = JSON.parse(text); } catch { parsed = text; }
   apiLog('ApiService.register - response body', parsed);
       if (!response.ok) {
-        const errorData = parsed;
-        throw new Error((errorData && (errorData.error || errorData.message)) ? (errorData.error || errorData.message) : 'Registration failed');
+        const errObj = parsed as Record<string, unknown> | string | null;
+        const msg = (errObj && typeof errObj === 'object' && (errObj['error'] || errObj['message'])) ? String(errObj['error'] ?? errObj['message']) : (typeof errObj === 'string' ? errObj : 'Registration failed');
+        throw new Error(msg);
       }
       const data: ApiResponse<User> = typeof parsed === 'object' ? parsed : await response.json();
       if (!data.data) {
@@ -294,31 +304,66 @@ export class ApiService {
       const url = `${this.baseUrl}/orders/confirm`;
   apiLog('ApiService.placeOrder - request url', url);
   // Transform internal OrderRequest (CartItem[]) into API schema
-  const apiPayload: any = {
-    items: (orderData.items || []).map((it: any) => ({
-      productId: Number(it.product?.id ?? it.productId ?? it.id),
-      size: String((it.size?.id || it.size || '')).toLowerCase(),
-      additives: (it.additives || []).map((a: any) => (a?.name ?? a ?? '') as string),
-      quantity: Number(it.quantity || 1)
-    })),
-    totalPrice: Number((orderData as any).totalAmount ?? (orderData as any).totalPrice ?? 0)
-  };
+  const apiPayload = {
+    items: (orderData.items || []).map((it) => {
+      const item = it as unknown as Record<string, unknown>;
+      // determine productId safely
+      const productField = item['product'] as Record<string, unknown> | undefined;
+      const productId = ((): number => {
+        if (productField && productField['id'] !== undefined) return Number(productField['id']);
+        if (item['productId'] !== undefined) return Number(item['productId']);
+        if (item['id'] !== undefined) return Number(item['id']);
+        return 0;
+      })();
+
+      const sizeVal = ((item['size'] as Record<string, unknown>)?.['id'] ?? item['size'] ?? '') as string;
+      const additivesArr = (item['additives'] as unknown[]) || [];
+
+      return {
+        productId: productId,
+        size: String(sizeVal).toLowerCase(),
+        additives: additivesArr.map((a) => {
+          const add = a as Record<string, unknown> | string;
+          return String((add as Record<string, unknown>)?.['name'] ?? add ?? '');
+        }),
+        quantity: Number(item['quantity'] ?? 1)
+      };
+    }),
+    totalPrice: Number((orderData as unknown as Record<string, unknown>)?.totalAmount ?? (orderData as unknown as Record<string, unknown>)?.totalPrice ?? 0)
+  } as Record<string, unknown>;
   apiLog('ApiService.placeOrder - transformed request body', apiPayload);
-      const response = await fetch(url, {
+      const doPost = async (payload: Record<string, unknown>): Promise<Response> => await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiPayload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
+
+      let response = await doPost(apiPayload);
+      // simple retry for 5xx
+      if (response.status >= 500 && response.status < 600) {
+        apiLog('ApiService.placeOrder - server-side error, retrying once', response.status);
+        await new Promise(r => setTimeout(r, 400));
+        response = await doPost(apiPayload);
+      }
   apiLog('ApiService.placeOrder - response status', response.status);
       const text = await response.text();
-      let parsed: any = null;
-      try { parsed = JSON.parse(text); } catch (e) { parsed = text; }
+  let parsed: unknown = null;
+  try { parsed = JSON.parse(text); } catch { parsed = text; }
       apiLog('ApiService.placeOrder - response body', parsed);
 
+      // detect simulated/test error flag in body
+      try {
+        const p = parsed as Record<string, unknown> | null;
+        if (p && p['isTestError']) {
+          throw new Error(String(p['error'] ?? p['message'] ?? 'Simulated API error'));
+        }
+      } catch {
+        // will be handled below as non-ok
+      }
+
       if (!response.ok) {
-        const errMsg = (parsed && (parsed.message || parsed.error)) ? (parsed.message || parsed.error) : (typeof parsed === 'string' ? parsed : JSON.stringify(parsed) || `Failed to place order (status ${response.status})`);
+  const p = parsed as Record<string, unknown> | string | null;
+  const errMsg = (p && typeof p === 'object' && (p['message'] || p['error'])) ? String(p['message'] ?? p['error']) : (typeof p === 'string' ? p : JSON.stringify(p) || `Failed to place order (status ${response.status})`);
 
         // If server responds with 404 or a message mentioning '/orders', try documented alternate path
         const bodyStr = typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
@@ -331,20 +376,21 @@ export class ApiService {
             });
             apiLog('ApiService.placeOrder - fallback response status', r2.status);
             const t2 = await r2.text();
-            let p2: any = null;
-            try { p2 = JSON.parse(t2); } catch (e) { p2 = t2; }
+            let p2: unknown = null;
+            try { p2 = JSON.parse(t2); } catch { p2 = t2; }
             apiLog('ApiService.placeOrder - fallback response body', p2);
             if (!r2.ok) {
-              const errMsg2 = (p2 && (p2.message || p2.error)) ? (p2.message || p2.error) : (typeof p2 === 'string' ? p2 : JSON.stringify(p2) || `Fallback failed (status ${r2.status})`);
+              const p2obj = p2 as Record<string, unknown> | string | null;
+              const errMsg2 = (p2obj && typeof p2obj === 'object' && (p2obj['message'] || p2obj['error'])) ? String(p2obj['message'] ?? p2obj['error']) : (typeof p2obj === 'string' ? p2obj : JSON.stringify(p2obj) || `Fallback failed (status ${r2.status})`);
               throw new Error(`${errMsg} | ${errMsg2}`);
             }
-            const data2: ApiResponse<OrderResponse> = typeof p2 === 'object' ? p2 : { data: null };
-            if (!data2.data) throw new Error('Order placement failed on fallback');
-            apiLog('ApiService.placeOrder - success (fallback)', data2.data);
-            return data2.data;
+            const data2wrap: ApiResponse<OrderResponse> = (p2 && typeof p2 === 'object') ? (p2 as ApiResponse<OrderResponse>) : { success: false, data: undefined };
+            if (!data2wrap.data) throw new Error('Order placement failed on fallback');
+            apiLog('ApiService.placeOrder - success (fallback)', data2wrap.data);
+            return data2wrap.data;
           } catch (fallbackErr) {
-            apiLog('ApiService.placeOrder - fallback error', fallbackErr, (fallbackErr as any)?.message || JSON.stringify(fallbackErr));
-            const ferr: any = fallbackErr as any;
+            apiLog('ApiService.placeOrder - fallback error', fallbackErr, ((fallbackErr as unknown) as { message?: string })?.message || JSON.stringify(fallbackErr));
+            const ferr = fallbackErr as { message?: string } | null;
             throw new Error(`${errMsg} | Fallback error: ${ferr?.message || JSON.stringify(ferr)}`);
           }
         }
@@ -352,14 +398,14 @@ export class ApiService {
         throw new Error(errMsg);
       }
 
-      const data: ApiResponse<OrderResponse> = typeof parsed === 'object' ? parsed : { data: null };
+      const data: ApiResponse<OrderResponse> = (parsed && typeof parsed === 'object') ? (parsed as ApiResponse<OrderResponse>) : { success: false, data: undefined };
       if (!data.data) {
         throw new Error('Order placement failed');
       }
   apiLog('ApiService.placeOrder - success', data.data);
       return data.data;
     } catch (error) {
-      apiLog('Error placing order:', error, (error as any)?.message || JSON.stringify(error));
+      apiLog('Error placing order:', error, ((error as unknown) as { message?: string })?.message || JSON.stringify(error));
       throw error;
     }
   }

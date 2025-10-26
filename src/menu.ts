@@ -210,13 +210,13 @@ class MenuApp {
       // Show a single price on the product card. If user is logged, prefer a discounted price
       let displayedPrice = product.price;
       if (isLogged) {
-        const discountFromProduct = (product as any).discountPrice as number | undefined;
-        const discounted = typeof discountFromProduct === 'number' ? discountFromProduct : +(product.price * 0.9).toFixed(2);
-        if (discounted < product.price) {
-          displayedPrice = discounted;
+        const discountFromProduct = (product as unknown as Record<string, unknown>)['discountPrice'];
+        const discountNum = typeof discountFromProduct === 'number' ? discountFromProduct : +(product.price * 0.9).toFixed(2);
+        if (discountNum < product.price) {
+          displayedPrice = discountNum;
         }
       }
-      const priceHtml = `\$${displayedPrice.toFixed(2)}`;
+      const priceHtml = `$${displayedPrice.toFixed(2)}`;
 
       return `
       <div class="menu-item" data-product-id="${product.id}">
@@ -302,9 +302,9 @@ class MenuApp {
 }
 
 // Initialize the menu application (guard to avoid multiple instances)
-if (!(window as any).__menuAppInitialized) {
+if (!(window as unknown as Window).__menuAppInitialized) {
   const menuApp = new MenuApp();
   // Expose cart globally for modal interactions
-  (window as any).cart = menuApp.getCart();
-  (window as any).__menuAppInitialized = true;
+  (window as unknown as Window).cart = menuApp.getCart();
+  (window as unknown as Window).__menuAppInitialized = true;
 }
