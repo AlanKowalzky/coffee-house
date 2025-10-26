@@ -12,7 +12,7 @@ export class Auth {
   constructor(apiService: ApiService) {
     this.apiService = apiService;
     this.loader = new Loader();
-    this.errorMessage = new ErrorMessage();
+    this.errorMessage = ErrorMessage.getInstance();
   }
 
   public renderLoginForm(): string {
@@ -123,7 +123,7 @@ export class Auth {
     const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
 
     if (!validateEmail(email) || !validatePassword(password)) {
-      this.errorMessage.show('Invalid email or password');
+      this.errorMessage.display('Invalid email or password');
       return;
     }
 
@@ -134,7 +134,7 @@ export class Auth {
       this.updateUserInterface(response.login);
       this.closeModals();
     } catch (error) {
-      this.errorMessage.show('Login error');
+
     } finally {
       this.loader.hide();
     }
@@ -146,7 +146,7 @@ export class Auth {
     const password = (document.getElementById('registerPassword') as HTMLInputElement).value;
 
     if (!validateEmail(email) || !validatePassword(password) || !name.trim()) {
-      this.errorMessage.show('Please fill all fields correctly');
+      this.errorMessage.display('Please fill all fields correctly');
       return;
     }
 
@@ -162,10 +162,10 @@ export class Auth {
         paymentMethod: PaymentMethod.CASH
       };
       await this.apiService.register(registerData);
-      this.errorMessage.show('Registration successful! You can now login');
+      this.errorMessage.display('Registration successful! You can now login');
       this.switchToLogin();
     } catch (error) {
-      this.errorMessage.show('Registration error');
+
     } finally {
       this.loader.hide();
     }

@@ -20,7 +20,7 @@ export class ErrorMessage {
     return container;
   }
 
-  public show(message: string, duration: number = 5000): void {
+  public display(message: string, duration: number = 5000): void {
     const notification = document.createElement('div');
     notification.className = 'error-notification';
     notification.innerHTML = `

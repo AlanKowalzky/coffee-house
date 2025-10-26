@@ -70,7 +70,7 @@ class MenuApp {
     } catch (error) {
       console.error('Error loading products:', error);
       loader.hide();
-      ErrorMessage.getInstance().show('Something went wrong. Please, refresh the page');
+      ErrorMessage.getInstance().display('Something went wrong. Please, refresh the page');
       // Load mock products if API fails
       this.loadMockProducts();
       console.log('Mock products loaded:', this.products.length);
@@ -202,16 +202,33 @@ class MenuApp {
     const productsToShow = filteredProducts.slice(0, this.displayedCount);
     console.log('Products to show:', productsToShow.length, 'Display count:', this.displayedCount);
 
-    menuGrid.innerHTML = productsToShow.map(product => `
+    const userJson = localStorage.getItem('user');
+    const isLogged = !!userJson;
+
+    menuGrid.innerHTML = productsToShow.map(product => {
+      // determine displayed price and whether to show discount
+      let priceHtml = `\$${product.price.toFixed(2)}`;
+      if (isLogged) {
+        // prefer explicit discounted price from product if present
+        // product may have 'discountPrice' (backend) or we apply a default 10% discount
+        const discountFromProduct = (product as any).discountPrice as number | undefined;
+        const discounted = typeof discountFromProduct === 'number' ? discountFromProduct : +(product.price * 0.9).toFixed(2);
+        if (discounted < product.price) {
+          priceHtml = `<span class="menu-item-price-discounted">\$${discounted.toFixed(2)}</span> <span class="menu-item-price-original">\$${product.price.toFixed(2)}</span>`;
+        }
+      }
+
+      return `
       <div class="menu-item" data-product-id="${product.id}">
         <img src="assets/${product.image}" alt="${product.name}" class="menu-item-image">
         <div class="menu-item-info">
           <h3 class="menu-item-name">${product.name}</h3>
           <p class="menu-item-description">${product.description}</p>
-          <span class="menu-item-price">$${product.price.toFixed(2)}</span>
+          <span class="menu-item-price">${priceHtml}</span>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     console.log('Menu grid HTML updated');
 

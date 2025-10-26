@@ -3,6 +3,8 @@ import { Cart } from './Cart';
 
 export class ProductModal {
   private cart: Cart;
+  private tooltipElement: HTMLElement | null = null;
+  private escListener?: (e: KeyboardEvent) => void;
 
   constructor(cart: Cart) {
     this.cart = cart;
@@ -20,6 +22,13 @@ export class ProductModal {
     // Show modal first
     modal.classList.add('show');
     document.body.style.overflow = 'hidden';
+    // add Esc key listener to close modal
+    this.escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        this.closeModal();
+      }
+    };
+    document.addEventListener('keydown', this.escListener);
     
     // Update modal content after showing
     setTimeout(() => {
@@ -106,6 +115,16 @@ export class ProductModal {
     if (modal) {
       modal.classList.remove('show');
       document.body.style.overflow = 'auto';
+      // remove esc listener when modal closes
+      if (this.escListener) {
+        document.removeEventListener('keydown', this.escListener);
+        this.escListener = undefined;
+      }
+      // remove any tooltip left behind
+      if (this.tooltipElement) {
+        this.tooltipElement.remove();
+        this.tooltipElement = null;
+      }
     }
   }
 
@@ -135,6 +154,10 @@ export class ProductModal {
     const sizeButtons = modal.querySelectorAll('[data-size]');
     console.log('Found size buttons:', sizeButtons.length);
     sizeButtons.forEach(btn => {
+      // tooltip handlers for size
+      btn.addEventListener('mouseenter', (ev) => this.showPriceTooltip(ev, btn as HTMLElement));
+      btn.addEventListener('mouseleave', () => this.hidePriceTooltip());
+
       btn.addEventListener('click', (e) => {
         console.log('Size button clicked:', btn.getAttribute('data-size'));
         modal.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
@@ -147,12 +170,60 @@ export class ProductModal {
     const additiveButtons = modal.querySelectorAll('[data-additive]');
     console.log('Found additive buttons:', additiveButtons.length);
     additiveButtons.forEach(btn => {
+      // tooltip handlers for additives
+      btn.addEventListener('mouseenter', (ev) => this.showPriceTooltip(ev, btn as HTMLElement));
+      btn.addEventListener('mouseleave', () => this.hidePriceTooltip());
+
       btn.addEventListener('click', (e) => {
         console.log('Additive button clicked:', btn.getAttribute('data-additive'));
         btn.classList.toggle('active');
         this.updatePrice(product, modal);
       });
     });
+  }
+
+  private showPriceTooltip(ev: Event, target: HTMLElement): void {
+    const priceAttr = target.getAttribute('data-price');
+    if (!priceAttr) return;
+    const price = parseFloat(priceAttr);
+    const text = isNaN(price) ? priceAttr : `${price.toFixed(2)} zł`;
+
+    // remove existing tooltip
+    if (this.tooltipElement) {
+      this.tooltipElement.remove();
+      this.tooltipElement = null;
+    }
+
+    const rect = target.getBoundingClientRect();
+    const tooltip = document.createElement('div');
+    tooltip.className = 'price-tooltip';
+    tooltip.textContent = text;
+    // basic inline styles so it works without CSS changes
+    tooltip.style.position = 'absolute';
+    tooltip.style.background = 'rgba(0,0,0,0.85)';
+    tooltip.style.color = '#fff';
+    tooltip.style.padding = '6px 8px';
+    tooltip.style.borderRadius = '4px';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.pointerEvents = 'none';
+    tooltip.style.zIndex = '9999';
+
+    document.body.appendChild(tooltip);
+    // position tooltip above the target, centered
+    const tRect = tooltip.getBoundingClientRect();
+    const left = rect.left + window.scrollX + rect.width / 2 - tRect.width / 2;
+    const top = rect.top + window.scrollY - tRect.height - 8;
+    tooltip.style.left = `${Math.max(8, left)}px`;
+    tooltip.style.top = `${Math.max(8, top)}px`;
+
+    this.tooltipElement = tooltip;
+  }
+
+  private hidePriceTooltip(): void {
+    if (this.tooltipElement) {
+      this.tooltipElement.remove();
+      this.tooltipElement = null;
+    }
   }
 
   private updatePrice(product: Product, modal: Element): void {
