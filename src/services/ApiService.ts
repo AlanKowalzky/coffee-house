@@ -11,23 +11,12 @@ export class ApiService {
       const resp = await fetch(url, { mode: 'cors' });
       apiLog('ApiService.fetchWithFallback - response status', resp.status);
       if (resp.ok) return await resp.json();
-      apiLog('ApiService.fetchWithFallback - non-ok response, will try local fallback', resp.status);
+      apiLog('ApiService.fetchWithFallback - non-ok response', resp.status);
     } catch (err) {
       apiLog('ApiService.fetchWithFallback - network/fetch error', err);
     }
 
-    // Local fallback (static file deployed with the site)
-    try {
-      const fallbackUrl = '/products.json';
-      apiLog('ApiService.fetchWithFallback - attempting fallback', fallbackUrl);
-      const r = await fetch(fallbackUrl);
-      if (r.ok) return await r.json();
-      apiLog('ApiService.fetchWithFallback - fallback non-ok', r.status);
-    } catch (e) {
-      apiLog('ApiService.fetchWithFallback - fallback fetch failed', e);
-    }
-
-    // As last resort return null
+    // As last resort return null (no fallback to products.json)
     return null;
   }
 
@@ -46,19 +35,38 @@ export class ApiService {
         return [];
       })();
 
-      if (items.length === 0) return this.getMockProducts();
+      if (items.length === 0) {
+        throw new Error('No products found from API');
+      }
 
-      const products = items.map((item: unknown) => {
+      const fallbackImageMap = await this.getFallbackProductImagesMap(); // Pobierz mapę obrazków fallbackowych
+      const mockProducts = this.getMockProducts(); // Pobierz wszystkie mockowane produkty
+
+      // Połącz produkty z API z mockowanymi, usuwając duplikaty i preferując API
+      const productsMap = new Map<string, Product>();
+
+      // Najpierw dodaj produkty z API
+      items.map((item: unknown) => {
         const it = item as Record<string, unknown>;
         const cat = this.normalizeCategory(it.category);
-        return {
+
+        // Zawsze używaj obrazka z fallbackImageMap (products.json), jeśli dostępny.
+        // Jeśli brak, użyj assets/Logo.png jako domyślnego placeholdera.
+        let finalImagePath: string = 'assets/Logo.png'; // Domyślny placeholder
+        if (fallbackImageMap.has(String(it.id))) {
+          finalImagePath = fallbackImageMap.get(String(it.id)) || 'assets/Logo.png';
+        }
+
+        apiLog('ApiService.getProducts - final image path for product', it.id, finalImagePath);
+
+        const product: Product = {
           id: String(it.id),
           name: String(it.name),
           description: String(it.description),
           price: parseFloat(String(it.price)),
           discountedPrice: it.discountPrice ? parseFloat(String(it.discountPrice)) : undefined,
           category: cat,
-          image: this.getImagePath(String(it.category), Number(it.id)),
+          image: finalImagePath,
           sizes: [
             { id: 'S', name: 'Small', price: 0 },
             { id: 'M', name: 'Medium', price: 0.50 },
@@ -69,13 +77,26 @@ export class ApiService {
             { id: 'milk', name: 'Milk', price: 0.50 },
             { id: 'syrup', name: 'Syrup', price: 0.50 }
           ]
-        } as Product;
+        };
+        productsMap.set(product.id, product);
       });
 
-      return products;
+      // Następnie dodaj mockowane produkty, jeśli nie ma ich jeszcze na liście (API ma priorytet)
+      mockProducts.forEach(mp => {
+        if (!productsMap.has(mp.id)) {
+          // Zastosuj logikę obrazków z fallbackImageMap również do mocków
+          let mockImagePath: string = 'assets/Logo.png';
+          if (fallbackImageMap.has(String(mp.id))) {
+            mockImagePath = fallbackImageMap.get(String(mp.id)) || 'assets/Logo.png';
+          }
+          productsMap.set(mp.id, { ...mp, image: mockImagePath });
+        }
+      });
+
+      return Array.from(productsMap.values());
     } catch (error) {
       console.error('Error fetching products:', error);
-      // Return mock data as fallback
+      // W przypadku błędu, zwróć wszystkie mockowane produkty jako ostateczny fallback
       return this.getMockProducts();
     }
   }
@@ -217,18 +238,38 @@ export class ApiService {
         return [];
       })();
 
-      const slice = items.slice(0, 3);
-      return slice.map((item) => {
+      if (items.length === 0) {
+        throw new Error('No favorite products found from API');
+      }
+
+      const fallbackImageMap = await this.getFallbackProductImagesMap(); // Pobierz mapę obrazków fallbackowych
+      const mockProducts = this.getMockProducts(); // Pobierz wszystkie mockowane produkty
+
+      // Połącz produkty z API z mockowanymi, usuwając duplikaty i preferując API
+      const productsMap = new Map<string, Product>();
+
+      // Najpierw dodaj produkty z API
+      items.map((item: unknown) => {
         const it = item as Record<string, unknown>;
         const cat = this.normalizeCategory(it.category);
-        return {
+
+        // Zawsze używaj obrazka z fallbackImageMap (products.json), jeśli dostępny.
+        // Jeśli brak, użyj assets/Logo.png jako domyślnego placeholdera.
+        let finalImagePath: string = 'assets/Logo.png'; // Domyślny placeholder
+        if (fallbackImageMap.has(String(it.id))) {
+          finalImagePath = fallbackImageMap.get(String(it.id)) || 'assets/Logo.png';
+        }
+
+        apiLog('ApiService.getFavoriteProducts - final image path for product', it.id, finalImagePath);
+
+        const product: Product = {
           id: String(it.id),
           name: String(it.name),
           description: String(it.description),
           price: parseFloat(String(it.price)),
           discountedPrice: it.discountPrice ? parseFloat(String(it.discountPrice)) : undefined,
           category: cat,
-          image: this.getImagePath(String(it.category), Number(it.id)),
+          image: finalImagePath,
           sizes: [
             { id: 'S', name: 'Small', price: 0 },
             { id: 'M', name: 'Medium', price: 0.50 },
@@ -239,8 +280,24 @@ export class ApiService {
             { id: 'milk', name: 'Milk', price: 0.50 },
             { id: 'syrup', name: 'Syrup', price: 0.50 }
           ]
-        } as Product;
+        };
+        productsMap.set(product.id, product);
       });
+
+      // Następnie dodaj mockowane produkty, jeśli nie ma ich jeszcze na liście (API ma priorytet)
+      mockProducts.forEach(mp => {
+        if (!productsMap.has(mp.id)) {
+          // Zastosuj logikę obrazków z fallbackImageMap również do mocków
+          let mockImagePath: string = 'assets/Logo.png';
+          if (fallbackImageMap.has(String(mp.id))) {
+            mockImagePath = fallbackImageMap.get(String(mp.id)) || 'assets/Logo.png';
+          }
+          productsMap.set(mp.id, { ...mp, image: mockImagePath });
+        }
+      });
+
+      // Ogranicz do 3 produktów, jeśli po połączeniu jest ich więcej
+      return Array.from(productsMap.values()).slice(0, 3);
     } catch (error) {
       console.error('Error fetching favorite products:', error);
       throw new Error('Failed to load favorite products');
@@ -449,6 +506,40 @@ export class ApiService {
     } catch (error) {
       apiLog('Error placing order:', error, ((error as unknown) as { message?: string })?.message || JSON.stringify(error));
       throw error;
+    }
+  }
+
+  private async getFallbackProductImagesMap(): Promise<Map<string, string>> {
+    try {
+      const fallbackUrl = '/products.json';
+      apiLog('ApiService.getFallbackProductImagesMap - attempting', fallbackUrl);
+      const r = await fetch(fallbackUrl);
+      if (!r.ok) {
+        apiLog('ApiService.getFallbackProductImagesMap - fallback non-ok', r.status);
+        return new Map();
+      }
+      const raw = await r.json();
+      const items: unknown[] = ((): unknown[] => {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw as unknown[];
+        const maybe = raw as Record<string, unknown>;
+        if (Array.isArray(maybe.data)) return maybe.data as unknown[];
+        return [];
+      })();
+
+      const imageMap = new Map<string, string>();
+      items.forEach((item: unknown) => {
+        const it = item as Record<string, unknown>;
+        const id = String(it.id);
+        const image = this.getImagePath(String(it.category), Number(it.id)); // Używamy istniejącej logiki do generowania ścieżki
+        if (id && image) {
+          imageMap.set(id, image);
+        }
+      });
+      return imageMap;
+    } catch (e) {
+      apiLog('ApiService.getFallbackProductImagesMap - fallback fetch failed', e);
+      return new Map();
     }
   }
 }

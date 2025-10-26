@@ -18,7 +18,7 @@ class App {
   private cart: Cart;
   private productModal: ProductModal;
   private menu: Menu;
-  private carousel: Carousel;
+  private carousel: Carousel | null; // Zmieniam typ na Carousel | null
   private burgerMenu: BurgerMenu;
 
   constructor() {
@@ -27,7 +27,7 @@ class App {
     this.auth = new Auth(this.apiService);
     this.productModal = new ProductModal(this.cart);
     this.menu = new Menu();
-    this.carousel = new Carousel();
+    this.carousel = null; // Inicjalizuję na null
     this.burgerMenu = new BurgerMenu();
     this.init();
   }
@@ -50,6 +50,7 @@ class App {
     this.auth.initializeAuth();
     this.auth.checkAuthStatus();
     this.cart.initializeCart();
+    this.carousel = new Carousel();
   }
 
   private enhanceExistingMenu(): void {

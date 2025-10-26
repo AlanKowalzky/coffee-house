@@ -28,6 +28,8 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg|mp4)$/,
+        // Wyklucz pliki z folderu 'assets' - będą one kopiowane przez CopyWebpackPlugin
+        exclude: /assets\//,
         type: 'asset/resource',
         generator: {
           filename: 'assets/[name][ext]'
@@ -49,7 +51,8 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: 'assets', to: 'assets' },
-        { from: 'styles', to: 'styles' }
+        { from: 'styles', to: 'styles' },
+        { from: 'products.json', to: 'products.json' }
       ]
     })
   ],
