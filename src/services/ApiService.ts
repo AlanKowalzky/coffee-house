@@ -4,30 +4,60 @@ import { apiLog } from './DebugLog';
 export class ApiService {
   private readonly baseUrl = 'https://6kt29kkeub.execute-api.eu-central-1.amazonaws.com';
 
+  // Try fetching from API; on network/CORS errors or non-ok responses fall back to local static `products.json`.
+  private async fetchWithFallback(url: string): Promise<unknown> {
+    try {
+      apiLog('ApiService.fetchWithFallback - attempting', url);
+      const resp = await fetch(url, { mode: 'cors' });
+      apiLog('ApiService.fetchWithFallback - response status', resp.status);
+      if (resp.ok) return await resp.json();
+      apiLog('ApiService.fetchWithFallback - non-ok response, will try local fallback', resp.status);
+    } catch (err) {
+      apiLog('ApiService.fetchWithFallback - network/fetch error', err);
+    }
 
+    // Local fallback (static file deployed with the site)
+    try {
+      const fallbackUrl = '/products.json';
+      apiLog('ApiService.fetchWithFallback - attempting fallback', fallbackUrl);
+      const r = await fetch(fallbackUrl);
+      if (r.ok) return await r.json();
+      apiLog('ApiService.fetchWithFallback - fallback non-ok', r.status);
+    } catch (e) {
+      apiLog('ApiService.fetchWithFallback - fallback fetch failed', e);
+    }
+
+    // As last resort return null
+    return null;
+  }
 
   async getProducts(): Promise<Product[]> {
     try {
       const url = `${this.baseUrl}/products`;
-  apiLog('ApiService.getProducts - request url', url);
-      const response = await fetch(url);
-  apiLog('ApiService.getProducts - response status', response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-  apiLog('ApiService.getProducts - response body', data);
-      
-      // Transform API data to match our Product interface
-      const products = (data.data || []).map((item: unknown) => {
+      apiLog('ApiService.getProducts - request url', url);
+      const raw = await this.fetchWithFallback(url);
+      apiLog('ApiService.getProducts - raw response', raw);
+
+      const items: unknown[] = ((): unknown[] => {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw as unknown[];
+        const maybe = raw as Record<string, unknown>;
+        if (Array.isArray(maybe.data)) return maybe.data as unknown[];
+        return [];
+      })();
+
+      if (items.length === 0) return this.getMockProducts();
+
+      const products = items.map((item: unknown) => {
         const it = item as Record<string, unknown>;
+        const cat = this.normalizeCategory(it.category);
         return {
           id: String(it.id),
           name: String(it.name),
           description: String(it.description),
           price: parseFloat(String(it.price)),
           discountedPrice: it.discountPrice ? parseFloat(String(it.discountPrice)) : undefined,
-          category: String(it.category),
+          category: cat,
           image: this.getImagePath(String(it.category), Number(it.id)),
           sizes: [
             { id: 'S', name: 'Small', price: 0 },
@@ -40,8 +70,8 @@ export class ApiService {
             { id: 'syrup', name: 'Syrup', price: 0.50 }
           ]
         } as Product;
-      }) || [];
-      
+      });
+
       return products;
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -54,6 +84,13 @@ export class ApiService {
     if (category === 'coffee') return `coffee-${Math.min(id, 8)}.jpg`;
     if (category === 'tea') return `tea-${Math.min(id - 8, 4)}.png`;
     return `dessert-${Math.min(id - 16, 8)}.png`;
+  }
+
+  private normalizeCategory(value: unknown): ProductCategory {
+    const s = String(value ?? '').toLowerCase();
+    if (s.includes('coffee')) return ProductCategory.COFFEE;
+    if (s.includes('tea')) return ProductCategory.TEA;
+    return ProductCategory.DESSERT;
   }
 
   private getMockProducts(): Product[] {
@@ -168,30 +205,29 @@ export class ApiService {
   async getFavoriteProducts(): Promise<Product[]> {
     try {
       const url = `${this.baseUrl}/products`;
-  apiLog('ApiService.getFavoriteProducts - request url', url);
-      const response = await fetch(url);
-  apiLog('ApiService.getFavoriteProducts - response status', response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-  apiLog('ApiService.getFavoriteProducts - response body', data);
-      
-      // Get first 3 coffee products as favorites
-      const coffeeProducts = ((data.data || []) as unknown[]).filter((item) => {
-        const it = item as Record<string, unknown>;
-        return String(it.category) === 'coffee';
-      }).slice(0, 3) || [];
+      apiLog('ApiService.getFavoriteProducts - request url', url);
+      const raw = await this.fetchWithFallback(url);
+      apiLog('ApiService.getFavoriteProducts - raw', raw);
 
-      return coffeeProducts.map((item) => {
+      const items: unknown[] = ((): unknown[] => {
+        if (!raw) return [];
+        if (Array.isArray(raw)) return raw as unknown[];
+        const maybe = raw as Record<string, unknown>;
+        if (Array.isArray(maybe.data)) return maybe.data as unknown[];
+        return [];
+      })();
+
+      const slice = items.slice(0, 3);
+      return slice.map((item) => {
         const it = item as Record<string, unknown>;
+        const cat = this.normalizeCategory(it.category);
         return {
           id: String(it.id),
           name: String(it.name),
           description: String(it.description),
           price: parseFloat(String(it.price)),
           discountedPrice: it.discountPrice ? parseFloat(String(it.discountPrice)) : undefined,
-          category: String(it.category),
+          category: cat,
           image: this.getImagePath(String(it.category), Number(it.id)),
           sizes: [
             { id: 'S', name: 'Small', price: 0 },
@@ -214,18 +250,24 @@ export class ApiService {
   async getProductById(id: string): Promise<Product> {
     try {
       const url = `${this.baseUrl}/products/${id}`;
-  apiLog('ApiService.getProductById - request url', url);
-      const response = await fetch(url);
-  apiLog('ApiService.getProductById - response status', response.status);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      apiLog('ApiService.getProductById - request url', url);
+      const raw = await this.fetchWithFallback(url);
+      apiLog('ApiService.getProductById - raw', raw);
+
+      if (!raw) throw new Error('Product not found');
+
+      // raw can be ApiResponse<Product> or plain product
+      let product: Product | null = null;
+      if (typeof raw === 'object' && (raw as Record<string, unknown>)['data']) {
+        const wrap = raw as ApiResponse<Product>;
+        product = wrap.data ?? null;
+      } else {
+        product = raw as unknown as Product;
       }
-      const data: ApiResponse<Product> = await response.json();
-  apiLog('ApiService.getProductById - response body', data);
-      if (!data.data) {
-        throw new Error('Product not found');
-      }
-      return data.data;
+
+      if (!product) throw new Error('Product not found');
+      product.category = this.normalizeCategory((product as Product).category as unknown);
+      return product;
     } catch (error) {
       console.error('Error fetching product:', error);
       throw new Error('Failed to load product details');
