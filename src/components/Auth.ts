@@ -127,7 +127,8 @@ export class Auth {
       return;
     }
 
-    this.loader.show();
+  // show loader on body while login request is in progress
+  this.loader.show(document.body);
     try {
       const response = await this.apiService.login({ login: email, password });
       localStorage.setItem('user', JSON.stringify(response));
@@ -150,7 +151,8 @@ export class Auth {
       return;
     }
 
-    this.loader.show();
+  // show loader on body while registration request is in progress
+  this.loader.show(document.body);
     try {
       const registerData = {
         login: name,

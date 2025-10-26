@@ -5,6 +5,7 @@ export class ProductModal {
   private cart: Cart;
   private tooltipElement: HTMLElement | null = null;
   private escListener?: (e: KeyboardEvent) => void;
+  private isAdding: boolean = false;
 
   constructor(cart: Cart) {
     this.cart = cart;
@@ -136,19 +137,32 @@ export class ProductModal {
 
     console.log('Binding modal events...');
 
-    // Close events
-    const closeBtn = modal.querySelector('.modal-close');
-    const overlay = modal.querySelector('.modal-overlay');
-    
-    closeBtn?.addEventListener('click', () => this.closeModal());
-    overlay?.addEventListener('click', () => this.closeModal());
+    // Close events - use onclick to overwrite previous handlers and avoid duplicates
+    const closeBtn = modal.querySelector('.modal-close') as HTMLElement | null;
+    const overlay = modal.querySelector('.modal-overlay') as HTMLElement | null;
+    if (closeBtn) closeBtn.onclick = () => this.closeModal();
+    if (overlay) overlay.onclick = () => this.closeModal();
 
-    // Add to cart button
-    const addToCartBtn = modal.querySelector('#add-to-cart');
-    addToCartBtn?.addEventListener('click', () => {
-      this.addToCart(product, modal);
-      this.closeModal();
-    });
+    // Add to cart button - assign onclick to avoid multiple listeners stacking
+    const addToCartBtn = modal.querySelector('#add-to-cart') as HTMLElement | null;
+    if (addToCartBtn) {
+      addToCartBtn.onclick = () => {
+        if (this.isAdding) return;
+        this.isAdding = true;
+        // disable button to avoid multiple clicks
+        (addToCartBtn as HTMLButtonElement).disabled = true;
+        try {
+          this.addToCart(product, modal);
+          this.closeModal();
+        } finally {
+          // reset guard shortly after to allow future adds
+          setTimeout(() => {
+            this.isAdding = false;
+            (addToCartBtn as HTMLButtonElement).disabled = false;
+          }, 300);
+        }
+      };
+    }
 
     // Size selection
     const sizeButtons = modal.querySelectorAll('[data-size]');

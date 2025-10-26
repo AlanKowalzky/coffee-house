@@ -89,8 +89,10 @@ class App {
   }
 }
 
-// Initialize the application
-const app = new App();
-
-// Expose cart globally for modal interactions
-(window as any).cart = app.getCart();
+// Initialize the application (guard to avoid multiple instances)
+if (!(window as any).__coffeeHouseAppInitialized) {
+  const app = new App();
+  // Expose cart globally for modal interactions
+  (window as any).cart = app.getCart();
+  (window as any).__coffeeHouseAppInitialized = true;
+}

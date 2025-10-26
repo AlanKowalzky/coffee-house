@@ -301,8 +301,10 @@ class MenuApp {
   }
 }
 
-// Initialize the menu application
-const menuApp = new MenuApp();
-
-// Expose cart globally for modal interactions
-(window as any).cart = menuApp.getCart();
+// Initialize the menu application (guard to avoid multiple instances)
+if (!(window as any).__menuAppInitialized) {
+  const menuApp = new MenuApp();
+  // Expose cart globally for modal interactions
+  (window as any).cart = menuApp.getCart();
+  (window as any).__menuAppInitialized = true;
+}
