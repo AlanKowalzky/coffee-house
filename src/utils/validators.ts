@@ -17,8 +17,9 @@ export class Validators {
       return { isValid: false, message: 'Login must start with a letter' };
     }
     
-    if (!/^[a-zA-Z]+$/.test(login)) {
-      return { isValid: false, message: 'Login can only contain English letters' };
+    // allow letters and digits, but must start with a letter
+    if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(login)) {
+      return { isValid: false, message: 'Login can contain only English letters and digits, and must start with a letter' };
     }
     
     return { isValid: true };
@@ -28,11 +29,14 @@ export class Validators {
     if (password.length < 6) {
       return { isValid: false, message: 'Password must be at least 6 characters long' };
     }
-    
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      return { isValid: false, message: 'Password must contain at least 1 special character' };
+
+    // accept password if it contains at least one digit or one special character
+    const hasDigit = /[0-9]/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    if (!hasDigit && !hasSpecial) {
+      return { isValid: false, message: 'Password must contain at least 1 digit or 1 special character' };
     }
-    
+
     return { isValid: true };
   }
 

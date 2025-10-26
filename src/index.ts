@@ -1,4 +1,5 @@
 import { ApiService } from './services/ApiService';
+import { apiLog } from './services/DebugLog';
 import { Auth } from './components/Auth';
 import { Cart } from './components/Cart';
 import { ProductModal } from './components/ProductModal';
@@ -80,6 +81,24 @@ class App {
         };
         
         this.productModal.showModal(product);
+      }
+    });
+
+    // Fetch favorites when user clicks the nav link or any anchor pointing to #favorites
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a[href="#favorites"]') as HTMLAnchorElement | null;
+      if (anchor) {
+        e.preventDefault();
+        apiLog('Favorites click detected - fetching favorite products');
+        this.apiService.getFavoriteProducts()
+          .then(products => {
+            apiLog('ApiService.getFavoriteProducts - success', products);
+            // keep UI update minimal for now; consumers can inspect console logs
+          })
+          .catch(err => {
+            apiLog('ApiService.getFavoriteProducts - error', err, (err as any)?.message || JSON.stringify(err));
+          });
       }
     });
   }

@@ -1,5 +1,6 @@
 import { CartItem, Product } from '../types/api';
 import { ApiService } from '../services/ApiService';
+import { apiLog } from '../services/DebugLog';
 
 export class Cart {
   private items: CartItem[] = [];
@@ -189,7 +190,8 @@ export class Cart {
   private async checkout(): Promise<void> {
     const user = localStorage.getItem('user');
     if (!user) {
-      alert('You must login to place an order');
+      apiLog('Cart.checkout - not authenticated', 'User must login to place an order');
+      console.warn('You must login to place an order');
       return;
     }
 
@@ -204,14 +206,20 @@ export class Cart {
           house: userData.house || 1
         }
       };
-      await this.apiService.placeOrder(orderData);
-      alert('Order placed successfully!');
+  apiLog('Cart.checkout - orderData', orderData);
+  const resp = await this.apiService.placeOrder(orderData);
+  apiLog('Cart.checkout - placeOrder response', resp);
+      apiLog('Cart.checkout - success', resp);
+      console.log('Order placed successfully!', resp);
       this.items = [];
       this.saveCart();
       this.updateCartDisplay();
       this.closeCartModal();
     } catch (error) {
-      alert('Error placing order');
+      const e: any = error;
+      apiLog('Cart.checkout - error', error, (e as any)?.message || JSON.stringify(e));
+      const err: any = error;
+      console.error('Error placing order:', err?.message || 'Unknown error');
     }
   }
 

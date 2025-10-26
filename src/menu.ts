@@ -207,16 +207,16 @@ class MenuApp {
 
     menuGrid.innerHTML = productsToShow.map(product => {
       // determine displayed price and whether to show discount
-      let priceHtml = `\$${product.price.toFixed(2)}`;
+      // Show a single price on the product card. If user is logged, prefer a discounted price
+      let displayedPrice = product.price;
       if (isLogged) {
-        // prefer explicit discounted price from product if present
-        // product may have 'discountPrice' (backend) or we apply a default 10% discount
         const discountFromProduct = (product as any).discountPrice as number | undefined;
         const discounted = typeof discountFromProduct === 'number' ? discountFromProduct : +(product.price * 0.9).toFixed(2);
         if (discounted < product.price) {
-          priceHtml = `<span class="menu-item-price-discounted">\$${discounted.toFixed(2)}</span> <span class="menu-item-price-original">\$${product.price.toFixed(2)}</span>`;
+          displayedPrice = discounted;
         }
       }
+      const priceHtml = `\$${displayedPrice.toFixed(2)}`;
 
       return `
       <div class="menu-item" data-product-id="${product.id}">

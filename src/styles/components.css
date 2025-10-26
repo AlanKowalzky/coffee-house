@@ -99,3 +99,20 @@
     transform: translateX(-50%) translateY(0);
   }
 }
+
+/* Validation styles for forms */
+.validation-message {
+  font-size: 13px;
+  color: #b00020; /* red */
+  margin-top: 6px;
+  min-height: 18px;
+}
+
+.invalid {
+  box-shadow: 0 0 0 2px rgba(176,0,32,0.08);
+  outline: none;
+}
+
+input.invalid, select.invalid, textarea.invalid {
+  border: 1px solid #b00020;
+}
