@@ -50,11 +50,14 @@ export class ApiService {
         const it = item as Record<string, unknown>;
         const cat = this.normalizeCategory(it.category);
 
-        // Zawsze używaj obrazka z fallbackImageMap (products.json), jeśli dostępny.
-        // Jeśli brak, użyj assets/Logo.png jako domyślnego placeholdera.
         let finalImagePath: string = 'assets/Logo.png'; // Domyślny placeholder
+
+        // Jeśli obrazek z products.json jest dostępny, użyj go
         if (fallbackImageMap.has(String(it.id))) {
-          finalImagePath = fallbackImageMap.get(String(it.id)) || 'assets/Logo.png';
+          const jsonImagePath = fallbackImageMap.get(String(it.id));
+          if (jsonImagePath) {
+            finalImagePath = jsonImagePath;
+          }
         }
 
         apiLog('ApiService.getProducts - final image path for product', it.id, finalImagePath);
@@ -84,10 +87,12 @@ export class ApiService {
       // Następnie dodaj mockowane produkty, jeśli nie ma ich jeszcze na liście (API ma priorytet)
       mockProducts.forEach(mp => {
         if (!productsMap.has(mp.id)) {
-          // Zastosuj logikę obrazków z fallbackImageMap również do mocków
           let mockImagePath: string = 'assets/Logo.png';
           if (fallbackImageMap.has(String(mp.id))) {
-            mockImagePath = fallbackImageMap.get(String(mp.id)) || 'assets/Logo.png';
+            const jsonImagePath = fallbackImageMap.get(String(mp.id));
+            if (jsonImagePath) {
+              mockImagePath = jsonImagePath;
+            }
           }
           productsMap.set(mp.id, { ...mp, image: mockImagePath });
         }
@@ -253,11 +258,14 @@ export class ApiService {
         const it = item as Record<string, unknown>;
         const cat = this.normalizeCategory(it.category);
 
-        // Zawsze używaj obrazka z fallbackImageMap (products.json), jeśli dostępny.
-        // Jeśli brak, użyj assets/Logo.png jako domyślnego placeholdera.
         let finalImagePath: string = 'assets/Logo.png'; // Domyślny placeholder
+
+        // Jeśli obrazek z products.json jest dostępny, użyj go
         if (fallbackImageMap.has(String(it.id))) {
-          finalImagePath = fallbackImageMap.get(String(it.id)) || 'assets/Logo.png';
+          const jsonImagePath = fallbackImageMap.get(String(it.id));
+          if (jsonImagePath) {
+            finalImagePath = jsonImagePath;
+          }
         }
 
         apiLog('ApiService.getFavoriteProducts - final image path for product', it.id, finalImagePath);
@@ -290,7 +298,10 @@ export class ApiService {
           // Zastosuj logikę obrazków z fallbackImageMap również do mocków
           let mockImagePath: string = 'assets/Logo.png';
           if (fallbackImageMap.has(String(mp.id))) {
-            mockImagePath = fallbackImageMap.get(String(mp.id)) || 'assets/Logo.png';
+            const jsonImagePath = fallbackImageMap.get(String(mp.id));
+            if (jsonImagePath) {
+              mockImagePath = jsonImagePath;
+            }
           }
           productsMap.set(mp.id, { ...mp, image: mockImagePath });
         }
