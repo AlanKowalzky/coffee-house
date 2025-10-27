@@ -35,20 +35,23 @@ class App {
   private init(): void {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        console.log('Coffee House Business App initialized');
+        console.log('Coffee House Business App initialized - DOMContentLoaded');
         this.initializeComponents();
         this.enhanceExistingMenu();
       });
     } else {
-      console.log('Coffee House Business App initialized');
+      console.log('Coffee House Business App initialized - document already ready');
       this.initializeComponents();
       this.enhanceExistingMenu();
     }
   }
 
   private initializeComponents(): void {
+    console.log('Initializing Auth component...');
     this.auth.initializeAuth();
+    console.log('Checking Auth status...');
     this.auth.checkAuthStatus();
+    console.log('Initializing Cart component...');
     this.cart.initializeCart();
     this.carousel = new Carousel();
   }

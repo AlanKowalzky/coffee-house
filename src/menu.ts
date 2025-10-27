@@ -36,13 +36,13 @@ class MenuApp {
   private init(): void {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        console.log('Coffee House Menu App initialized');
+        console.log('Coffee House Menu App initialized - DOMContentLoaded');
         this.initializeComponents();
         this.loadProducts();
         this.bindEvents();
       });
     } else {
-      console.log('Coffee House Menu App initialized');
+      console.log('Coffee House Menu App initialized - document already ready');
       this.initializeComponents();
       this.loadProducts();
       this.bindEvents();
@@ -50,8 +50,11 @@ class MenuApp {
   }
 
   private initializeComponents(): void {
+    console.log('Menu App: Initializing Auth component...');
     this.auth.initializeAuth();
+    console.log('Menu App: Checking Auth status...');
     this.auth.checkAuthStatus();
+    console.log('Menu App: Initializing Cart component...');
     this.cart.initializeCart();
   }
 

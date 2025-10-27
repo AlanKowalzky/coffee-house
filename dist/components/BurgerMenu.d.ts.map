@@ -1,0 +1,1 @@
+{"version":3,"file":"BurgerMenu.d.ts","sourceRoot":"","sources":["../../src/components/BurgerMenu.ts"],"names":[],"mappings":"AAAA,qBAAa,UAAU;IACrB,OAAO,CAAC,MAAM,CAAqB;IACnC,OAAO,CAAC,GAAG,CAAqB;IAChC,OAAO,CAAC,UAAU,CAAkB;;IAQpC,OAAO,CAAC,IAAI;IAQZ,OAAO,CAAC,UAAU;IAOlB,OAAO,CAAC,SAAS;IASjB,OAAO,CAAC,kBAAkB;IAc1B,OAAO,CAAC,YAAY;CAKrB"}

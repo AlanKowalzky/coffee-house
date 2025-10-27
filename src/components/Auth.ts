@@ -93,13 +93,17 @@ export class Auth {
   }
 
   public initializeAuth(): void {
+    console.log('Auth: initializeAuth called.');
     this.addAuthButtons();
     this.bindEvents();
+    console.log('Auth: initializeAuth finished.');
   }
 
   private addAuthButtons(): void {
+    console.log('Auth: addAuthButtons called.');
     const header = document.querySelector('header .container');
     if (header) {
+      console.log('Auth: Header container found, adding auth buttons.');
       const authButtons = document.createElement('div');
       authButtons.className = 'auth-buttons';
       authButtons.innerHTML = `
@@ -111,6 +115,8 @@ export class Auth {
         </div>
       `;
       header.appendChild(authButtons);
+    } else {
+      console.log('Auth: Header container not found, cannot add auth buttons.');
     }
   }
 
@@ -226,9 +232,15 @@ export class Auth {
   }
 
   private showLoginModal(): void {
+    console.log('Auth: showLoginModal called.');
     // avoid inserting duplicate modal if one already exists
-    if (document.getElementById('loginModal')) return;
+    if (document.getElementById('loginModal')) {
+      console.log('Auth: Login modal already exists, returning.');
+      return;
+    }
+    console.log('Auth: Inserting login modal into body.');
     document.body.insertAdjacentHTML('beforeend', this.renderLoginForm());
+    console.log('Auth: Login modal inserted.');
   }
 
   private showRegisterModal(): void {
