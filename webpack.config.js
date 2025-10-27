@@ -10,6 +10,7 @@ module.exports = {
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: process.env.NODE_ENV === 'production' ? '/coffeJS/' : '/',
     clean: true
   },
   resolve: {
@@ -60,7 +61,7 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'dist')
     },
-    port: 3001,
+    port: 3000,
     open: true
   }
 };

@@ -5,6 +5,7 @@
     "price": "7.00",
     "category": "coffee",
     "image": "coffee-1.jpg",
+    "id": "1",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -41,6 +42,7 @@
     "price": "7.00",
     "category": "coffee",
     "image": "coffee-2.jpg",
+    "id": "2",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -77,6 +79,7 @@
     "price": "5.50",
     "category": "coffee",
     "image": "coffee-3.jpg",
+    "id": "3",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -113,6 +116,7 @@
     "price": "5.00",
     "category": "coffee",
     "image": "coffee-4.jpg",
+    "id": "4",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -149,6 +153,7 @@
     "price": "4.50",
     "category": "coffee",
     "image": "coffee-5.jpg",
+    "id": "5",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -185,6 +190,7 @@
     "price": "5.50",
     "category": "coffee",
     "image": "coffee-6.jpg",
+    "id": "6",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -221,6 +227,7 @@
     "price": "5.50",
     "category": "coffee",
     "image": "coffee-7.jpg",
+    "id": "7",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -257,6 +264,7 @@
     "price": "6.50",
     "category": "coffee",
     "image": "coffee-8.jpg",
+    "id": "8",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -293,6 +301,7 @@
     "price": "4.50",
     "category": "tea",
     "image": "tea-1.png",
+    "id": "9",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -329,6 +338,7 @@
     "price": "5.00",
     "category": "tea",
     "image": "tea-2.png",
+    "id": "10",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -365,6 +375,7 @@
     "price": "5.00",
     "category": "tea",
     "image": "tea-3.png",
+    "id": "11",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -401,6 +412,7 @@
     "price": "5.50",
     "category": "tea",
     "image": "tea-4.png",
+    "id": "12",
     "sizes": {
       "s": {
         "size": "200 ml",
@@ -437,6 +449,7 @@
     "price": "3.50",
     "category": "dessert",
     "image": "dessert-1.png",
+    "id": "13",
     "sizes": {
       "s": {
         "size": "50 g",
@@ -473,6 +486,7 @@
     "price": "4.00",
     "category": "dessert",
     "image": "dessert-2.png",
+    "id": "14",
     "sizes": {
       "s": {
         "size": "50 g",
@@ -509,6 +523,7 @@
     "price": "4.50",
     "category": "dessert",
     "image": "dessert-3.png",
+    "id": "15",
     "sizes": {
       "s": {
         "size": "50 g",
@@ -545,6 +560,7 @@
     "price": "4.00",
     "category": "dessert",
     "image": "dessert-4.png",
+    "id": "16",
     "sizes": {
       "s": {
         "size": "50 g",
@@ -581,6 +597,7 @@
     "price": "4.50",
     "category": "dessert",
     "image": "dessert-5.png",
+    "id": "17",
     "sizes": {
       "s": {
         "size": "50 g",
@@ -617,6 +634,7 @@
     "price": "4.50",
     "category": "dessert",
     "image": "dessert-6.png",
+    "id": "18",
     "sizes": {
       "s": {
         "size": "50 g",
@@ -653,6 +671,7 @@
     "price": "5.50",
     "category": "dessert",
     "image": "dessert-7.png",
+    "id": "19",
     "sizes": {
       "s": {
         "size": "50 g",
@@ -689,6 +708,7 @@
     "price": "6.50",
     "category": "dessert",
     "image": "dessert-8.png",
+    "id": "20",
     "sizes": {
       "s": {
         "size": "50 g",

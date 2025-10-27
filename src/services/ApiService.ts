@@ -542,7 +542,7 @@ export class ApiService {
       items.forEach((item: unknown) => {
         const it = item as Record<string, unknown>;
         const id = String(it.id);
-        const image = this.getImagePath(String(it.category), Number(it.id)); // Używamy istniejącej logiki do generowania ścieżki
+        const image = String(it.image);
         if (id && image) {
           imageMap.set(id, image);
         }

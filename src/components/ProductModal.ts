@@ -51,7 +51,7 @@ export class ProductModal {
       });
       
       if (modalImage) {
-        const imagePath = `assets/${product.image}`;
+        const imagePath = product.image;
         console.log('Setting image src to:', imagePath);
         console.log('Current modalImage src before:', modalImage.src);
         modalImage.src = imagePath;
